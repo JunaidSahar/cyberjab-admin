@@ -39,7 +39,7 @@ const moduleList = ref([
     name: "Home",
     icon: "material-symbols:home-outline",
     link: "/",
-    active: route.path === "/" ? true : false,
+    active: route.path == "/" ? true : false
   },
   {
     name: "Modules",

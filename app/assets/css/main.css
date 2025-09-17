@@ -20,3 +20,5 @@ option:not(:first-of-type) {
 .ProseMirror {
     min-height: 300px;
 }
+
+

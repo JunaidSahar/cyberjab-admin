@@ -2,13 +2,13 @@
   <div>
     <div class="space-y-2">
       <NuxtLink
-        to="/instructors"
+        to="/users"
         class="flex items-center gap-2 text-headingColor text-sm"
       >
         <Icon name="material-symbols:arrow-back-rounded" />
-        <span> Instructors </span>
+        <span> Users </span>
       </NuxtLink>
-      <h1 class="text-headingColor text-3xl">Create a new Instructor</h1>
+      <h1 class="text-headingColor text-3xl">Create a new User</h1>
     </div>
 
     <div class="flex gap-6 pt-6 w-full">
@@ -35,7 +35,7 @@
         </div>
       </div>
       <div class="bg-darkForground p-6 rounded-xl w-[60%]">
-        <h3 class="pb-5 text-headingColor text-2xl">Instructor information</h3>
+        <h3 class="pb-5 text-headingColor text-2xl">User information</h3>
 
         <form action="" class="gap-5 grid grid-cols-2">
           <div class="flex flex-col gap-2 col-span-1">

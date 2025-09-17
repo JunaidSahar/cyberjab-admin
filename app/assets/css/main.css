@@ -12,13 +12,24 @@ option:not(:first-of-type) {
 
 .ProseMirror p {
     color: white;
-    padding: 12px !important;
     border: 0px !important;
     outline: none !important;
 }
 
 .ProseMirror {
     min-height: 300px;
+    padding: 12px !important;
+    outline: none;
 }
 
+.ProseMirror ul, ol {
+  list-style: revert;
+  margin: revert;
+  padding: revert;
+}
 
+.ProseMirror a {
+  text-decoration: underline;
+  color: #a9a6ff;
+  cursor: pointer;
+}

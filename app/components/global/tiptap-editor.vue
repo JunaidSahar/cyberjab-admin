@@ -133,7 +133,7 @@ const editor = useEditor({
     OrderedList,
     Image,
     Link.configure({
-      openOnClick: false,
+      openOnClick: true,
       defaultProtocol: "https",
     }),
 
@@ -155,7 +155,7 @@ function addImage() {
 }
 
 function setLink() {
-  const previousUrl = this.editor.getAttributes("link").href;
+  const previousUrl = editor.value.getAttributes("link").href;
   const url = window.prompt("URL", previousUrl);
 
   // cancelled
@@ -165,13 +165,12 @@ function setLink() {
 
   // empty
   if (url === "") {
-    this.editor.chain().focus().extendMarkRange("link").unsetLink().run();
-
+    editor.value.chain().focus().extendMarkRange("link").unsetLink().run();
     return;
   }
 
   // update link
-  this.editor
+  editor.value
     .chain()
     .focus()
     .extendMarkRange("link")
@@ -183,13 +182,3 @@ onBeforeUnmount(() => {
   unref(editor).destroy();
 });
 </script>
-
-<style>
-ul {
-  list-style: disc !important;
-}
-
-ol {
-  list-style: decimal !important;
-}
-</style>

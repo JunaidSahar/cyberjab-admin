@@ -10,31 +10,45 @@
       </NuxtLink>
       <h1 class="text-headingColor text-3xl">Create a new module</h1>
     </div>
-    <div class="space-x-8 pt-5 border-b border-border w-full">
-      <button
-        v-if="props.mode !== 'create'"
-        @click="activeTab = 'settings'"
-        :class="
-          activeTab == 'settings' ? 'border-headingColor' : 'border-transparent'
-        "
-        type="button"
-        class="pb-4 border-b-2 text-headingColor"
-      >
-        Settings
-      </button>
-      <button
-        @click="activeTab = 'carriculum'"
-        :class="
-          activeTab == 'carriculum'
-            ? 'border-headingColor'
-            : 'border-transparent'
-        "
-        v-if="props.mode !== 'create'"
-        type="button"
-        class="pb-4 border-b-2 text-headingColor"
-      >
-        Carriculum
-      </button>
+    <div class="flex justify-between items-center gap-2 pt-5 border-b border-border w-full">
+      <div class="space-x-8">
+
+        <button
+          v-if="props.mode !== 'create'"
+          @click="activeTab = 'settings'"
+          :class="
+            activeTab == 'settings' ? 'border-headingColor' : 'border-transparent'
+          "
+          type="button"
+          class="pb-6 border-b-2 text-headingColor"
+        >
+          Settings
+        </button>
+        <button
+          @click="activeTab = 'carriculum'"
+          :class="
+            activeTab == 'carriculum'
+              ? 'border-headingColor'
+              : 'border-transparent'
+          "
+          v-if="props.mode !== 'create'"
+          type="button"
+          class="pb-6 border-b-2 text-headingColor"
+        >
+          Carriculum
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button class="flex items-center gap-2 bg-darkForground px-5 py-2 rounded-lg text-white text-sm">
+        <Icon name="mdi:eye-outline" />
+          Preview
+        </button>
+        <button class="flex items-center gap-2 bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%),linear-gradient(0deg,_rgba(0,_0,_0,_0.2),_rgba(0,_0,_0,_0.2))] px-5 py-2 rounded-lg text-white text-sm">
+        <Icon name="material-symbols:arrow-upload-progress" />
+          Publish
+        </button>
+      </div>
     </div>
 
     <div v-if="activeTab == 'settings'" class="flex gap-6 pt-6 w-full">

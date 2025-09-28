@@ -29,11 +29,80 @@
         </li>
       </ul>
     </div>
+    
+    <!-- User Info and Logout -->
+    <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-border">
+      <ClientOnly>
+        <div v-if="userStore.isAuthenticated" class="space-y-3">
+          <div class="text-sm text-gray-400">
+            <p>Logged in as:</p>
+            <p class="text-white font-medium">{{ userStore.user?.email || 'Admin User' }}</p>
+          </div>
+          <button
+            @click="handleLogout"
+            :disabled="loggingOut"
+            class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Icon name="material-symbols:logout" class="w-4 h-4 mr-2" />
+            {{ loggingOut ? 'Logging out...' : 'Logout' }}
+          </button>
+        </div>
+        <div v-else class="space-y-3">
+          <div class="text-sm text-gray-400">
+            <p>Not logged in</p>
+          </div>
+          <button
+            @click="$router.push('/login')"
+            class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
+          >
+            <Icon name="material-symbols:login" class="w-4 h-4 mr-2" />
+            Login
+          </button>
+        </div>
+        <template #fallback>
+          <div class="space-y-3">
+            <div class="text-sm text-gray-400">
+              <p>Loading...</p>
+            </div>
+          </div>
+        </template>
+      </ClientOnly>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { useUserStore } from "@/stores/userStore";
+import { useAuth } from "@/composables/useAuth";
 const route = useRoute();
+const router = useRouter();
+const { logout } = useAuth();
+
+const loggingOut = ref(false);
+
+const userStore = useUserStore();
+
+const handleLogout = async () => {
+  loggingOut.value = true;
+  
+  try {
+    const { error } = await logout();
+    
+    if (error) {
+       console.error("Failed to logout properly:", error);
+     } else {
+       console.log("You have been logged out successfully");
+     }
+    
+    // Redirect to login page
+    await router.push('/login');
+  } catch (err) {
+     console.error("An unexpected error occurred during logout:", err);
+   } finally {
+    loggingOut.value = false;
+  }
+};
+
 const moduleList = computed(() => {
   return [
     {

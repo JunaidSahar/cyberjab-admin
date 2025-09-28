@@ -9,7 +9,7 @@ import Navbar from '~/components/global/navbar.vue';
 
             <Navbar />
         </div>
-        <div class="flex-1 p-10 h-full overflow-y-auto">
+        <div class="flex-1 p-10 h-full overflow-y-auto max-w-[1400px]">
             <NuxtPage />
         </div>
     </div>

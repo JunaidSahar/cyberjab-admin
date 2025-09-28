@@ -8,7 +8,7 @@
         <Icon name="material-symbols:arrow-back-rounded" />
         <span> Modules </span>
       </NuxtLink>
-      <h1 class="text-headingColor text-3xl">Create a new module</h1>
+      <h1 class="text-headingColor text-3xl">{{props?.moduleData?.name || "Create a new module" }}</h1>
     </div>
     <div class="flex justify-between items-center gap-2 pt-5 border-b border-border w-full">
       <div class="space-x-8">
@@ -78,17 +78,25 @@
         <h3 class="pb-5 text-headingColor text-2xl">Module Information</h3>
 
         <form action="" class="gap-5 grid grid-cols-2">
+          <!-- Error display -->
+          <div v-if="error" class="bg-red-900/50 border border-red-500 rounded-md p-3 col-span-2">
+            <p class="text-red-300 text-sm">{{ error }}</p>
+          </div>
+
           <div class="flex flex-col gap-2 col-span-1">
             <label for="name" class="text-headingColor">Name</label>
             <input
+              v-model="formData.name"
               type="text"
               placeholder="Enter first name"
               class="bg-darkBackground placeholder:opacity-30 px-4 py-3 rounded-lg text-headingColor text-sm"
+              required
             />
           </div>
           <div class="flex flex-col gap-2 col-span-1">
             <label for="instructor" class="text-headingColor">Instructor</label>
             <select
+              v-model="formData.instructor"
               name="instructor"
               id="instructor"
               class="bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm"
@@ -100,10 +108,11 @@
             </select>
           </div>
           <div class="flex flex-col gap-2 col-span-2">
-            <label for="instructor" class="text-headingColor">Packages</label>
+            <label for="packages" class="text-headingColor">Packages</label>
             <select
-              name="instructor"
-              id="instructor"
+              v-model="formData.packages"
+              name="packages"
+              id="packages"
               class="bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm"
             >
               <option selected="">Select Packages</option>
@@ -117,19 +126,31 @@
               >Description</label
             >
             <textarea
+              v-model="formData.description"
               placeholder="Enter description for the module"
               rows="6"
-              class="bg-darkBackground px-4 py-3 rounded-lg placeholder:text-headingColor/30 text-sm"
+              class="bg-darkBackground px-4 py-3 rounded-lg placeholder:text-headingColor/30 text-sm text-white"
               name="description"
               id="desc"
             ></textarea>
           </div>
 
-          <div class="pt-3">
+          <div class="pt-3 flex gap-3">
             <button
-              class="bg-[#292D32] px-5 py-2.5 rounded-lg text-headingColor"
+              @click="saveDraft"
+              :disabled="loading"
+              type="button"
+              class="bg-[#292D32] px-5 py-2.5 rounded-lg text-headingColor disabled:opacity-50"
             >
-              Save as draft
+              {{ loading ? 'Saving...' : 'Save as draft' }}
+            </button>
+            <button
+              @click="publishModule"
+              :disabled="loading"
+              type="button"
+              class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] px-5 py-2.5 rounded-lg text-white disabled:opacity-50"
+            >
+              {{ loading ? 'Publishing...' : 'Publish' }}
             </button>
           </div>
         </form>
@@ -223,6 +244,24 @@
 <script setup>
 import TiptapEditor from '../global/tiptap-editor.vue';
 
+const props = defineProps({
+  mode: {
+    type: String,
+    default: "update",
+  },
+  moduleData: {
+    type: Object,
+    default: null,
+  },
+  moduleSlug: {
+    type: String,
+    default: null,
+  },
+});
+
+const router = useRouter()
+const { createModule, updateModule } = useModules()
+
 const activeTab = ref("settings");
 const selectedCarriculum = ref({})
 const carriculums = ref([
@@ -241,10 +280,89 @@ const carriculums = ref([
     content: "<p>content</p>",
   },
 ]);
-const props = defineProps({
-  mode: {
-    type: String,
-    default: "update",
-  },
-});
+
+// Form data
+const formData = ref({
+  name: '',
+  description: '',
+  instructor: '',
+  packages: '',
+  image: '',
+  status: 'draft'
+})
+
+// Form state
+const loading = ref(false)
+const error = ref(null)
+
+// Initialize form data
+const initializeForm = () => {
+  if (props.mode === 'edit' && props.moduleData) {
+    formData.value = {
+      name: props.moduleData.name || '',
+      description: props.moduleData.description || '',
+      instructor: props.moduleData.instructor || '',
+      packages: props.moduleData.packages || '',
+      image: props.moduleData.image || '',
+      status: props.moduleData.status || 'draft'
+    }
+  } else {
+    // Reset form for create mode
+    formData.value = {
+      name: '',
+      description: '',
+      instructor: '',
+      packages: '',
+      image: '',
+      status: 'draft'
+    }
+  }
+}
+
+// Watch for prop changes
+watch(() => props.moduleData, () => {
+  initializeForm()
+}, { immediate: true })
+
+// Save module (create or update)
+const saveModule = async (isDraft = true) => {
+  loading.value = true
+  error.value = null
+  
+  try {
+    const modulePayload = {
+      ...formData.value,
+      status: isDraft ? 'draft' : 'published'
+    }
+    
+    let result
+    if (props.mode === 'create') {
+      result = await createModule(modulePayload)
+    } else {
+      result = await updateModule(props.moduleSlug, modulePayload)
+    }
+    
+    if (result.error) {
+      error.value = result.error
+    } else {
+      // Success - redirect to modules page
+      router.push('/modules')
+    }
+  } catch (err) {
+    error.value = 'An unexpected error occurred'
+    console.error('Save module error:', err)
+  } finally {
+    loading.value = false
+  }
+}
+
+// Publish module
+const publishModule = () => {
+  saveModule(false)
+}
+
+// Save as draft
+const saveDraft = () => {
+  saveModule(true)
+}
 </script>

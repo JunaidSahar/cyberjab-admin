@@ -1,37 +1,37 @@
 <template>
-  <div class="flex items-center justify-center min-h-screen bg-gray-50">
-    <div class="max-w-md w-full space-y-8 p-8">
+  <div class="flex justify-center items-center bg-transparent min-h-96">
+    <div class="space-y-8 p-8 w-full max-w-md">
       <div class="text-center">
-        <img class="mx-auto h-12 w-auto" src="/logo.svg" alt="CyberJab Admin" />
-        <h2 class="mt-6 text-3xl font-extrabold text-gray-900">
+        <img class="mx-auto w-auto h-12" src="/logo.svg" alt="CyberJab Admin" />
+        <h2 class="mt-6 font-extrabold text-white text-3xl">
           {{ pageTitle }}
         </h2>
-        <p class="mt-2 text-sm text-gray-600">
+        <p class="mt-2 text-gray-200 text-sm">
           {{ pageMessage }}
         </p>
       </div>
 
       <!-- Loading State -->
       <div v-if="loading" class="flex flex-col items-center space-y-4">
-        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+        <div class="border-b-2 border-blue-600 rounded-full w-12 h-12 animate-spin"></div>
         <p class="text-gray-600">Processing authentication...</p>
       </div>
 
       <!-- Error State -->
-      <div v-else-if="error" class="bg-red-50 border border-red-200 rounded-md p-4">
+      <div v-else-if="error" class="bg-red-50 p-4 border border-red-200 rounded-md">
         <div class="flex">
           <div class="flex-shrink-0">
-            <Icon name="heroicons:x-circle" class="h-5 w-5 text-red-400" />
+            <Icon name="heroicons:x-circle" class="w-5 h-5 text-red-400" />
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-red-800">Authentication Failed</h3>
-            <div class="mt-2 text-sm text-red-700">
+            <h3 class="font-medium text-red-800 text-sm">Authentication Failed</h3>
+            <div class="mt-2 text-red-700 text-sm">
               <p>{{ error }}</p>
             </div>
             <div class="mt-4">
               <button 
                 @click="retryAuthentication" 
-                class="px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                class="bg-white hover:bg-gray-50 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-gray-700 text-sm"
               >
                 Try Again
               </button>
@@ -41,14 +41,14 @@
       </div>
 
       <!-- Success State -->
-      <div v-else-if="success" class="bg-green-50 border border-green-200 rounded-md p-4">
+      <div v-else-if="success" class="bg-green-50 p-4 border border-green-200 rounded-md">
         <div class="flex">
           <div class="flex-shrink-0">
-            <Icon name="heroicons:check-circle" class="h-5 w-5 text-green-400" />
+            <Icon name="heroicons:check-circle" class="w-5 h-5 text-green-400" />
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-green-800">Authentication Successful</h3>
-            <div class="mt-2 text-sm text-green-700">
+            <h3 class="font-medium text-green-800 text-sm">Authentication Successful</h3>
+            <div class="mt-2 text-green-700 text-sm">
               <p>Redirecting to dashboard...</p>
             </div>
           </div>
@@ -56,14 +56,14 @@
       </div>
 
       <!-- Access Required State -->
-      <div v-else-if="route.query.message === 'access_required'" class="bg-blue-50 border border-blue-200 rounded-md p-4">
+      <div v-else-if="route.query.message === 'access_required'" class="bg-blue-50 p-4 border border-blue-200 rounded-md">
         <div class="flex">
           <div class="flex-shrink-0">
-            <Icon name="heroicons:information-circle" class="h-5 w-5 text-blue-400" />
+            <Icon name="heroicons:information-circle" class="w-5 h-5 text-blue-400" />
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-blue-800">Authentication Required</h3>
-            <div class="mt-2 text-sm text-blue-700">
+            <h3 class="font-medium text-blue-800 text-sm">Authentication Required</h3>
+            <div class="mt-2 text-blue-700 text-sm">
               <p>You need to login to cyber jab application then click admin from navbar to access this application</p>
             </div>
           </div>
@@ -71,14 +71,14 @@
       </div>
 
       <!-- No Token State -->
-      <div v-else class="bg-yellow-50 border border-yellow-200 rounded-md p-4">
+      <div v-else class="bg-yellow-50 p-4 border border-yellow-200 rounded-md">
         <div class="flex">
           <div class="flex-shrink-0">
-            <Icon name="heroicons:exclamation-triangle" class="h-5 w-5 text-yellow-400" />
+            <Icon name="heroicons:exclamation-triangle" class="w-5 h-5 text-yellow-400" />
           </div>
           <div class="ml-3">
-            <h3 class="text-sm font-medium text-yellow-800">No Authentication Token</h3>
-            <div class="mt-2 text-sm text-yellow-700">
+            <h3 class="font-medium text-yellow-800 text-sm">No Authentication Token</h3>
+            <div class="mt-2 text-yellow-700 text-sm">
               <p>Please access this page through your SSO provider with a valid authentication token.</p>
             </div>
           </div>

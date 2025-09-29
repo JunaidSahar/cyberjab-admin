@@ -79,7 +79,7 @@
 
         <form action="" class="gap-5 grid grid-cols-2">
           <!-- Error display -->
-          <div v-if="error" class="bg-red-900/50 border border-red-500 rounded-md p-3 col-span-2">
+          <div v-if="error" class="col-span-2 bg-red-900/50 p-3 border border-red-500 rounded-md">
             <p class="text-red-300 text-sm">{{ error }}</p>
           </div>
 
@@ -102,9 +102,7 @@
               class="bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm"
             >
               <option selected="">Select an instructor</option>
-              <option>1</option>
-              <option>2</option>
-              <option>3</option>
+              <option v-for="(ins, index) in instructors" :key="index" :value="ins.id">{{ins?.first_name}} {{ ins?.last_name }}</option>
             </select>
           </div>
           <div class="flex flex-col gap-2 col-span-2">
@@ -129,18 +127,18 @@
               v-model="formData.description"
               placeholder="Enter description for the module"
               rows="6"
-              class="bg-darkBackground px-4 py-3 rounded-lg placeholder:text-headingColor/30 text-sm text-white"
+              class="bg-darkBackground px-4 py-3 rounded-lg text-white placeholder:text-headingColor/30 text-sm"
               name="description"
               id="desc"
             ></textarea>
           </div>
 
-          <div class="pt-3 flex gap-3">
+          <div class="flex gap-3 pt-3">
             <button
               @click="saveDraft"
               :disabled="loading"
               type="button"
-              class="bg-[#292D32] px-5 py-2.5 rounded-lg text-headingColor disabled:opacity-50"
+              class="bg-[#292D32] disabled:opacity-50 px-5 py-2.5 rounded-lg text-headingColor"
             >
               {{ loading ? 'Saving...' : 'Save as draft' }}
             </button>
@@ -148,7 +146,7 @@
               @click="publishModule"
               :disabled="loading"
               type="button"
-              class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] px-5 py-2.5 rounded-lg text-white disabled:opacity-50"
+              class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] disabled:opacity-50 px-5 py-2.5 rounded-lg text-white"
             >
               {{ loading ? 'Publishing...' : 'Publish' }}
             </button>
@@ -258,6 +256,22 @@ const props = defineProps({
     default: null,
   },
 });
+const {getInstructors} = useInstructors()
+
+const instructors = ref([]);
+
+//fetch instructors
+const fetchInstructors = async () => {
+  const data = await getInstructors();
+
+  if (data) {
+    instructors.value = data.data?.results;
+  }
+};
+
+onMounted(() => {
+  fetchInstructors()
+})
 
 const router = useRouter()
 const { createModule, updateModule } = useModules()

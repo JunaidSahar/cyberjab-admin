@@ -15,7 +15,7 @@
       <div class="flex flex-col items-center bg-darkForground p-6 rounded-xl w-[20%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Profile Picture</h3>
 
-        <div class="flex justify-center items-center bg-[#292D32] rounded-full w-60 min-h-60 overflow-hidden">
+        <div class="flex justify-center items-center bg-[#292D32] rounded-full w-60 h-60 overflow-hidden">
           <img 
             v-if="form.photo_url" 
             :src="form.photo_url" 

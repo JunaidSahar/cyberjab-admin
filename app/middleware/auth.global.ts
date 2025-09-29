@@ -1,4 +1,5 @@
 import { useUserStore } from "@/stores/userStore";
+import { useAuth } from "~/composables/useAuth";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   // Skip middleware on server-side rendering to avoid store initialization issues

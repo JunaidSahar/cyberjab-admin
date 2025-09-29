@@ -30,7 +30,7 @@
             Active
           </button>
         </div>
-        <div class="overflow-hidden">
+        <div class="overflow-x-auto overflow-y-visible">
           <table class="min-w-full">
             <thead>
               <tr class="bg-[#292D32] text-headingColor">
@@ -77,14 +77,40 @@
                       : 'font-medium',
                   ]"
                 >
-                  <template v-if="col.key === 'action'">
-                    <button
-                      type="button"
-                      class="inline-flex items-center gap-x-2 disabled:opacity-50 border border-transparent rounded-lg focus:outline-hidden font-semibold text-white hover:text-white/80 focus:text-blue-800 dark:hover:text-blue-400 dark:focus:text-blue-400 dark:text-blue-500 text-sm disabled:pointer-events-none"
-                      @click="$emit('action', row)"
-                    >
-                      <Icon name="humbleicons:dots-vertical" class="w-5 h-5" />
-                    </button>
+                  <template v-if="col.key === 'profile_image'">
+                    <div class="flex items-center justify-center">
+                      <img
+                        v-if="row[col.key]"
+                        :src="row[col.key]"
+                        :alt="`${row.first_name} ${row.last_name}`"
+                        class="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
+                        @error="handleImageError"
+                      />
+                      <div
+                        v-else
+                        class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm"
+                      >
+                        {{ getInitials(row.first_name, row.last_name) }}
+                      </div>
+                    </div>
+                  </template>
+                  <template v-else-if="col.key === 'action'">
+                    <DropdownMenu
+                      :options="[
+                        {
+                          label: 'Edit',
+                          icon: 'material-symbols:edit',
+                          action: 'edit'
+                        },
+                        {
+                          label: 'Delete',
+                          icon: 'material-symbols:delete',
+                          action: 'delete',
+                          class: 'text-red-500'
+                        }
+                      ]"
+                      @action="(action: any) => handleRowAction(action, row)"
+                    />
                   </template>
                   <template v-else-if="col.key === 'status'">
                     <div
@@ -110,7 +136,7 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from "vue";
 
 const props = defineProps({
@@ -135,14 +161,15 @@ const props = defineProps({
   },
 });
 
-const selectedRows = ref([]);
+const selectedRows = ref<number[]>([]);
 
 const allSelected = computed(
   () => selectedRows.value.length === props.data.length && props.data.length > 0
 );
 
-function toggleSelectAll(e) {
-  if (e.target.checked) {
+function toggleSelectAll(e: Event) {
+  const target = e.target as HTMLInputElement;
+  if (target.checked) {
     selectedRows.value = props.data.map((_, idx) => idx);
   } else {
     selectedRows.value = [];
@@ -160,5 +187,23 @@ function emitSelectedAction() {
   emit("selected-action", selectedData);
 }
 
-const emit = defineEmits(["selected-action"]);
+const emit = defineEmits(["selected-action", "action"]);
+
+function handleRowAction(action: string, row: any) {
+  emit("action", { action, row });
+}
+
+// Helper function to generate initials from first and last name
+function getInitials(firstName: string, lastName: string): string {
+  const first = firstName ? firstName.charAt(0).toUpperCase() : '';
+  const last = lastName ? lastName.charAt(0).toUpperCase() : '';
+  return first + last || '?';
+}
+
+// Handle image loading errors by hiding the broken image
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.style.display = 'none';
+  // The fallback initials div will show instead
+}
 </script>

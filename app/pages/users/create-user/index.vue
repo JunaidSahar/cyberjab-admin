@@ -71,7 +71,7 @@
             <textarea
               placeholder="Enter bio"
               rows="6"
-              class="bg-darkBackground px-4 py-3 rounded-lg placeholder:text-headingColor/30 text-sm"
+              class="bg-darkBackground px-4 py-3 rounded-lg placeholder:text-headingColor/30 text-sm text-white"
               name="description"
               id="desc"
             ></textarea>

@@ -116,10 +116,31 @@ import { BulletList, ListItem, OrderedList } from "@tiptap/extension-list";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 
-// import { Dropcursor } from "@tiptap/extensions";
+const props = defineProps({
+  modelValue: {
+    type: String,
+    default: "",
+  },
+  initialContent: {
+    type: String,
+    default: "",
+  },
+  placeholder: {
+    type: String,
+    default: "Start typing...",
+  },
+});
+
+const emit = defineEmits(['update:modelValue']);
+
+// Get initial content from either modelValue or initialContent
+const getInitialContent = () => {
+  const content = props.modelValue || props.initialContent;
+  return content || `<p>${props.placeholder}</p>`;
+};
 
 const editor = useEditor({
-  content: "<p>Content</p>",
+  content: getInitialContent(),
   extensions: [
     TiptapStarterKit,
     TextStyle,
@@ -136,11 +157,29 @@ const editor = useEditor({
       openOnClick: true,
       defaultProtocol: "https",
     }),
-
   ],
+  onUpdate: ({ editor }) => {
+    // Emit the HTML content whenever the editor content changes
+    const html = editor.getHTML();
+    emit('update:modelValue', html);
+  },
 });
 
 const selectedFontSize = ref("16");
+
+// Watch for changes in modelValue prop to update editor content
+watch(() => props.modelValue, (newValue) => {
+  if (editor.value && newValue !== editor.value.getHTML()) {
+    editor.value.commands.setContent(newValue || `<p>${props.placeholder}</p>`);
+  }
+});
+
+// Watch for changes in initialContent prop to update editor content
+watch(() => props.initialContent, (newValue) => {
+  if (editor.value && newValue && newValue !== editor.value.getHTML()) {
+    editor.value.commands.setContent(newValue);
+  }
+});
 
 function setFontSize(fontSize) {
   editor.value.chain().focus().setFontSize(`${fontSize}px`).run();
@@ -150,7 +189,7 @@ function addImage() {
   const url = window.prompt("URL");
 
   if (url) {
-    this.editor.chain().focus().setImage({ src: url }).run();
+    editor.value.chain().focus().setImage({ src: url }).run();
   }
 }
 
@@ -178,7 +217,14 @@ function setLink() {
     .run();
 }
 
+// Expose methods for parent components
+defineExpose({
+  getHTML: () => editor.value?.getHTML(),
+  setContent: (content) => editor.value?.commands.setContent(content),
+  focus: () => editor.value?.commands.focus(),
+});
+
 onBeforeUnmount(() => {
-  unref(editor).destroy();
+  unref(editor)?.destroy();
 });
 </script>

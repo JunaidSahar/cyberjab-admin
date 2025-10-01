@@ -230,6 +230,7 @@
       :module-id="moduleData.id"
       @lesson-saved="handleLessonSaved"
       @lesson-deleted="handleLessonDeleted"
+      :module-slug="moduleSlug"
     />
   </div>
 </template>

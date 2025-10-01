@@ -3,44 +3,81 @@
     <!-- Curriculum List -->
     <div class="space-y-2 w-[25%]">
       <div
-        class="flex justify-between items-center bg-darkForground px-3 py-2 rounded-lg transition-all cursor-pointer"
-        v-for="(item, index) in carriculums"
-        :key="index"
-        @click="selectCarriculum(item, index)"
-        :class="selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''"
+        v-if="loading"
+        class="flex justify-center items-center gap-2 min-h-72 text-headingColor/50 text-center"
       >
-        <div class="flex items-center gap-3">
+        <Icon
+          name="svg-spinners:180-ring-with-bg"
+          class="w-5 h-5 animate-spin"
+        />
+        Loading...
+      </div>
+      <div v-else-if="!lessons.length">
+        <div
+          class="flex flex-col justify-center items-center gap-2 bg-darkForground rounded-xl min-h-72 text-headingColor/50 text-center"
+        >
           <Icon
-            name="material-symbols:drag-indicator"
-            class="w-5 h-5 text-headingColor cursor-grab"
+            name="material-symbols-light:nfc-off-outline-rounded"
+            class="w-16 h-16 text-headingColor/30"
           />
-          <div class="flex items-center gap-5">
-            <div class="space-y-1">
-              <p class="font-semibold text-headingColor text-sm">
-                {{ item.name || "Untitled Lesson" }}
-              </p>
-              <div class="flex items-center gap-3">
-                <div class="flex items-center gap-1 text-headingColor text-xs">
-                  <Icon name="mingcute:time-duration-line" />
-                  <span>{{ item.duration || "0m" }}</span>
-                </div>
-                <div
-                  v-if="item.has_lab"
-                  class="flex items-center gap-1 text-headingColor text-xs"
-                >
-                  <Icon name="hugeicons:test-tube-01" />
-                  <span>Lab</span>
+          <p class="text-headingColor/50 text-sm">
+            No lessons available. Add a new lesson to get started.
+          </p>
+        </div>
+      </div>
+      <draggable
+        v-else-if="!loading"
+        v-model="lessons"
+        group="lessons"
+        item-key="id"
+        handle=".drag-handle"
+        @end="onDragEnd"
+        class="space-y-2"
+      >
+        <template #item="{ element: item, index }">
+          <div
+            class="flex justify-between items-center bg-darkForground px-3 py-2 rounded-lg transition-all cursor-pointer"
+            @click="selectCarriculum(item, index)"
+            :class="
+              selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''
+            "
+          >
+            <div class="flex items-center gap-3">
+              <Icon
+                name="material-symbols:drag-indicator"
+                class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing drag-handle"
+              />
+              <div class="flex items-center gap-5">
+                <div class="space-y-1">
+                  <p class="font-semibold text-headingColor text-sm">
+                    {{ item.name || "Untitled Lesson" }}
+                  </p>
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="flex items-center gap-1 text-headingColor text-xs"
+                    >
+                      <Icon name="mingcute:time-duration-line" />
+                      <span>{{ item.duration || "0m" }}</span>
+                    </div>
+                    <div
+                      v-if="item.has_lab"
+                      class="flex items-center gap-1 text-headingColor text-xs"
+                    >
+                      <Icon name="hugeicons:test-tube-01" />
+                      <span>Lab</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
+            <Icon
+              name="material-symbols:delete-outline"
+              class="w-5 h-5 text-headingColor hover:text-red-400 transition-colors cursor-pointer"
+              @click.stop="() => openDeleteModal(index)"
+            />
           </div>
-        </div>
-        <Icon
-          name="material-symbols:delete-outline"
-          class="w-5 h-5 text-headingColor hover:text-red-400 transition-colors cursor-pointer"
-          @click.stop="() => openDeleteModal(index)"
-        />
-      </div>
+        </template>
+      </draggable>
 
       <div
         class="flex justify-center items-center gap-2 bg-darkForground hover:bg-darkForground/80 px-4 py-2 rounded-lg min-h-10 text-white transition-colors cursor-pointer"
@@ -55,14 +92,6 @@
     <div class="bg-darkForground p-6 rounded-xl w-[75%]">
       <div class="flex justify-between items-center pb-5">
         <h3 class="text-headingColor text-2xl">Lesson Information</h3>
-        <button
-          v-if="selectedCarriculumIndex !== null"
-          @click="saveLessonChanges"
-          :disabled="lessonLoading"
-          class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] disabled:opacity-50 px-4 py-2 rounded-lg text-white text-sm transition-opacity"
-        >
-          {{ lessonLoading ? "Saving..." : "Save Changes" }}
-        </button>
       </div>
 
       <!-- Empty State -->
@@ -146,7 +175,6 @@
           <ClientOnly>
             <TiptapEditor
               v-model="selectedCarriculum.content"
-              :initial-content="selectedCarriculum.content"
               :placeholder="'Enter lesson content...'"
             />
           </ClientOnly>
@@ -163,29 +191,32 @@
           </button>
           <button
             type="submit"
-            :disabled="lessonLoading || !selectedCarriculum.title?.trim()"
+            :disabled="lessonLoading || !selectedCarriculum.name?.trim()"
             class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] disabled:opacity-50 px-5 py-2.5 rounded-lg text-white transition-opacity"
           >
-            {{ lessonLoading ? "Saving..." : "Save Lesson" }}
+            {{ lessonLoading ? "Creating..." : "Save Lesson" }}
           </button>
         </div>
       </form>
     </div>
+
     <!-- Confirm Modal -->
     <ConfirmModal
       v-show="confirmDeleteVisible"
       v-model:visible="confirmDeleteVisible"
       title="Confirm Delete"
       message="Are you sure you want to delete this lesson?"
-      @confirm="deleteCarriculum()"
+      @confirm="deleteCarriculum"
       @close="confirmDeleteVisible = false"
     />
   </div>
 </template>
 
 <script setup>
+import draggable from "vuedraggable";
 import TiptapEditor from "../global/tiptap-editor.vue";
-import ConfirmModal from "../global/confirm-modal.vue";
+
+const { getLessons, createLesson, updateLesson, deleteLesson } = useLesson();
 
 // Props
 const props = defineProps({
@@ -194,52 +225,68 @@ const props = defineProps({
     default: () => [],
   },
   moduleId: {
-    type: [String, Number],
+    type: String,
+    default: null,
+  },
+  moduleSlug: {
+    type: String,
     default: null,
   },
 });
 
 // Emits
 const emit = defineEmits([
-  "update:modelValue",
   "lesson-saved",
   "lesson-deleted",
+  "lesson-added",
+  "lessons-reordered",
 ]);
 
 // Reactive data
+const lessons = ref([]);
 const selectedCarriculum = ref({});
 const selectedCarriculumIndex = ref(null);
 const confirmDeleteVisible = ref(false);
 const lessonLoading = ref(false);
+const loading = ref(false);
+const deleteIndex = ref(null);
+const isCreatingLesson = ref(false);
 
-// Initialize curriculum data
-const carriculums = ref(
-  props.modelValue.length > 0 ? [...props.modelValue] : []
-);
+// Fetch lessons from API
+const fetchLessons = async () => {
+  if (!props.moduleSlug) {
+    console.warn("Module slug is required to fetch lessons");
+    return;
+  }
 
-const openDeleteModal = (index) => {
-  confirmDeleteVisible.value = true
-  selectedCarriculumIndex.value = index
-}
-
-// Watch for prop changes
-watch(
-  () => props.modelValue,
-  (newValue) => {
-    if (newValue && newValue.length > 0) {
-      carriculums.value = [...newValue];
+  loading.value = true;
+  try {
+    const data = await getLessons(1, 100, props.moduleSlug); // Get all lessons
+    if (data && data.data) {
+      lessons.value = data.data || [];
+    } else if (data && data.error) {
+      console.error("Error fetching lessons:", data.error);
     }
-  },
-  { deep: true }
-);
+  } catch (error) {
+    console.error("Error fetching lessons:", error);
+  } finally {
+    loading.value = false;
+  }
+};
 
-// Emit changes to parent
+// Initialize on mount
+onMounted(() => {
+  fetchLessons();
+});
+
+// Watch for moduleSlug changes
 watch(
-  carriculums,
-  (newValue) => {
-    emit("update:modelValue", newValue);
-  },
-  { deep: true }
+  () => props.moduleSlug,
+  (newSlug) => {
+    if (newSlug) {
+      fetchLessons();
+    }
+  }
 );
 
 // Utility Functions
@@ -250,8 +297,8 @@ const generateSlug = (title) => {
     .replace(/(^-|-$)/g, "");
 };
 
-const generateId = () => {
-  return Date.now() + Math.random();
+const generateTempId = () => {
+  return `temp_${Date.now()}_${Math.random()}`;
 };
 
 // Curriculum Management Functions
@@ -262,34 +309,46 @@ const selectCarriculum = (item, index) => {
 
 const addNewLesson = () => {
   const newLesson = {
-    id: generateId(),
-    title: "",
+    id: generateTempId(), // Temporary ID for new lessons
+    name: "",
     duration: "",
     slug: "",
-    lab: false,
+    has_lab: false,
     content: "<p>Enter your lesson content here...</p>",
-    order: carriculums.value.length + 1,
+    order: lessons.value.length + 1,
+    is_new: true, // Flag to identify new lessons
   };
 
-  carriculums.value.push(newLesson);
-  const newIndex = carriculums.value.length - 1;
+  lessons.value.push(newLesson);
+  const newIndex = lessons.value.length - 1;
   selectCarriculum(newLesson, newIndex);
+
+  // Emit event for parent to handle
+  emit("lesson-added", newLesson);
 };
 
-const deleteCarriculum = async (index) => {
-  const lessonToDelete = selectedCarriculumIndex;
+const openDeleteModal = (index) => {
+  deleteIndex.value = index;
+  confirmDeleteVisible.value = true;
+};
+
+const deleteCarriculum = async () => {
+  const index = deleteIndex.value;
+  if (index === null) return;
+
+  const lessonToDelete = lessons.value[index];
 
   try {
-    // Emit deletion event for parent to handle API call if needed
+    // Emit deletion event for parent to handle API call
+    const deleteResponse = await deleteLesson(lessonToDelete.slug);
+    if (deleteResponse.error) {
+      throw new Error(deleteResponse.error);
+    }
+
     emit("lesson-deleted", lessonToDelete);
 
     // Remove from local array
-    carriculums.value.splice(index, 1);
-
-    // Update order for remaining lessons
-    carriculums.value.forEach((lesson, idx) => {
-      lesson.order = idx + 1;
-    });
+    lessons.value.splice(index, 1);
 
     // Reset selection if deleted item was selected
     if (selectedCarriculumIndex.value === index) {
@@ -298,18 +357,21 @@ const deleteCarriculum = async (index) => {
     } else if (selectedCarriculumIndex.value > index) {
       selectedCarriculumIndex.value--;
     }
+
+    console.log("Lesson deleted:", lessonToDelete);
   } catch (error) {
     console.error("Error deleting lesson:", error);
     alert("Failed to delete lesson. Please try again.");
   } finally {
-    confirmDeleteVisible.value = false
+    confirmDeleteVisible.value = false;
+    deleteIndex.value = null;
   }
 };
 
 const saveLessonChanges = async () => {
   if (
     selectedCarriculumIndex.value === null ||
-    !selectedCarriculum.value.title?.trim()
+    !selectedCarriculum.value.name?.trim()
   ) {
     return;
   }
@@ -318,18 +380,41 @@ const saveLessonChanges = async () => {
 
   try {
     // Auto-generate slug if empty
-    if (!selectedCarriculum.value.slug && selectedCarriculum.value.title) {
+    if (!selectedCarriculum.value.slug && selectedCarriculum.value.name) {
       selectedCarriculum.value.slug = generateSlug(
-        selectedCarriculum.value.title
+        selectedCarriculum.value.name
       );
     }
 
     // Update the lesson in the array
-    carriculums.value[selectedCarriculumIndex.value] = {
+    lessons.value[selectedCarriculumIndex.value] = {
       ...selectedCarriculum.value,
     };
 
-    // Emit save event for parent to handle API call if needed
+    // Emit save event for parent to handle API call
+    if (selectedCarriculum.value.is_new) {
+      await createLesson({
+        slug: selectedCarriculum.value.slug,
+        module: props.moduleId,
+        name: selectedCarriculum.value.name,
+        duration: selectedCarriculum.value.duration,
+        has_lab: selectedCarriculum.value.has_lab,
+        content: selectedCarriculum.value.content,
+        order: selectedCarriculum.value.order,
+      });
+    } else {
+      await updateLesson(selectedCarriculum.value.slug, {
+        name: selectedCarriculum.value.name,
+        duration: selectedCarriculum.value.duration,
+        has_lab: selectedCarriculum.value.has_lab,
+        content: selectedCarriculum.value.content,
+        order: selectedCarriculum.value.order,
+        module: props.moduleId,
+        slug: props.value.slug,
+      });
+    }
+
+    // Emit save event for parent to handle API call
     emit("lesson-saved", selectedCarriculum.value);
 
     console.log("Lesson saved:", selectedCarriculum.value);
@@ -343,19 +428,25 @@ const saveLessonChanges = async () => {
 
 const cancelLessonEdit = () => {
   if (selectedCarriculumIndex.value !== null) {
-    // Restore original values
-    selectedCarriculum.value = {
-      ...carriculums.value[selectedCarriculumIndex.value],
-    };
+    // If it's a new lesson that hasn't been saved, remove it
+    if (lessons.value[selectedCarriculumIndex.value]?.is_new) {
+      lessons.value.splice(selectedCarriculumIndex.value, 1);
+      selectedCarriculum.value = {};
+      selectedCarriculumIndex.value = null;
+    } else {
+      // Restore original values for existing lessons
+      const originalLesson = lessons.value[selectedCarriculumIndex.value];
+      selectedCarriculum.value = { ...originalLesson };
+    }
   }
 };
 
-// Auto-generate slug when title changes
+// Auto-generate slug when name changes
 watch(
-  () => selectedCarriculum.value.title,
-  (newTitle) => {
-    if (newTitle && !selectedCarriculum.value.slug) {
-      selectedCarriculum.value.slug = generateSlug(newTitle);
+  () => selectedCarriculum.value.name,
+  (newName) => {
+    if (newName && !selectedCarriculum.value.slug) {
+      selectedCarriculum.value.slug = generateSlug(newName);
     }
   }
 );
@@ -364,6 +455,76 @@ watch(
 defineExpose({
   addNewLesson,
   saveLessonChanges,
-  carriculums: readonly(carriculums),
+  fetchLessons,
+  lessons: readonly(lessons),
 });
+
+// Drag and Drop Functions
+const onDragEnd = async (event) => {
+  const { oldIndex, newIndex } = event;
+
+  if (oldIndex === newIndex) return;
+
+  // Update the order property for all lessons
+  lessons.value.forEach((lesson, index) => {
+    lesson.order = index + 1;
+  });
+
+  // Emit the reordered lessons to parent
+  emit("lessons-reordered", lessons.value);
+
+  // If you have an API endpoint to update lesson order, call it here
+  await updateLessonOrder();
+};
+
+const updateLessonOrder = async () => {
+  try {
+    // Create an array of lesson IDs in their new order
+    const orderedLessons = lessons.value.map((lesson, index) => ({
+      id: lesson.id,
+      order: index + 1,
+    }));
+
+    // If you have an API endpoint for bulk order update, use it here
+    // For now, we'll update each lesson individually
+    for (const lesson of lessons.value) {
+      if (!lesson.is_new && lesson.id) {
+        // Only update existing lessons (not new ones)
+        const { error } = await updateLesson(lesson.slug, {
+          ...lesson,
+          order: lesson.order,
+        });
+
+        if (error) {
+          console.error("Error updating lesson order:", error);
+        }
+      }
+    }
+
+    console.log("Lesson order updated successfully");
+  } catch (error) {
+    console.error("Error updating lesson order:", error);
+  }
+};
 </script>
+
+<style scoped>
+.drag-handle:hover {
+  color: #0800f7;
+}
+
+.sortable-ghost {
+  opacity: 0.5;
+  background: #1e1f23;
+  border: 2px dashed #0800f7;
+}
+
+.sortable-chosen {
+  transform: rotate(5deg);
+}
+
+.sortable-drag {
+  transform: rotate(5deg);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+</style>

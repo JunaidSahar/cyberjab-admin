@@ -158,7 +158,7 @@ const handleSSOAuthentication = async () => {
     
     // Step 5: Redirect to dashboard after a short delay
     setTimeout(() => {
-      router.push('/');
+      window.location.href = '/';
     }, 1500);
 
   } catch (err: any) {

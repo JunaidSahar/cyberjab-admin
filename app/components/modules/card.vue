@@ -1,9 +1,15 @@
 <template>
     <div class="bg-darkForground rounded-xl overflow-hidden flex flex-col">
-        <img :src="module?.image || '/module-1.png'" :alt="module?.name || 'Module image'" class="w-full h-48 object-cover">
+        <img :src="module?.photo || '/module-1.png'" :alt="module?.name || 'Module image'" class="w-full h-48 object-cover">
         <div class="space-y-2 p-4 min-h-48 flex flex-col h-full">
             <h3 class="font-bold text-headingColor text-lg">{{ module?.name || 'Untitled Module' }}</h3>
             <p class="text-headingColor text-sm flex-1">{{ truncatedDescription }}</p>
+            <div v-if="module?.instructor" class="text-xs text-blue-400">
+                Instructor: {{ module.instructor.name }}
+            </div>
+            <div v-if="module?.plans?.length" class="text-xs text-green-400">
+                Plans: {{ module.plans.map(p => p.name).join(', ') }}
+            </div>
             <div class="flex items-center gap-2 text-xs text-gray-400">
                 <span>Created: {{ formatDate(module?.created_at) }}</span>
                 <span v-if="module?.updated_at">• Updated: {{ formatDate(module?.updated_at) }}</span>

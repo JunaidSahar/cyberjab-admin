@@ -66,19 +66,32 @@
       <div class="bg-darkForground p-6 rounded-xl w-[30%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Image</h3>
 
-        <div class="bg-darkBackground rounded-lg w-full min-h-60">
-          <img src="" alt="" />
+        <div class="bg-darkBackground rounded-lg w-full min-h-60 flex items-center justify-center overflow-hidden">
+          <img 
+            v-if="imagePreview || props.moduleData?.photo" 
+            :src="imagePreview || props.moduleData?.photo" 
+            :alt="formData.name || 'Module photo'" 
+            class="w-full h-full object-cover"
+          />
+          <div v-else class="text-gray-400 text-center">
+            <Icon name="material-symbols:broken-image-outline" class="w-16 h-16 mx-auto mb-2" />
+            <p>No image uploaded</p>
+          </div>
         </div>
 
         <div class="flex flex-col justify-center items-center gap-4 pt-6">
           <div
             class="group bg-gradient-to-r from-[#00B9FF] to-[#4E47FF] p-px rounded-lg w-fit"
           >
-            <button
-              class="flex bg-darkForground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all"
-            >
+            <label class="flex bg-darkForground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer">
               Upload Photo
-            </button>
+              <input
+                type="file"
+                accept="image/*"
+                @change="handleFileUpload"
+                class="hidden"
+              />
+            </label>
           </div>
           <p class="opacity-50 max-w-48 text-[#E2E2E2] text-sm text-center">
             at least 536 x 300px PNG or JPG file.
@@ -140,13 +153,17 @@
               v-model="formData.instructor"
               name="instructor"
               id="instructor"
+              :disabled="instructorsLoading"
               :class="[
                 'bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm',
                 fieldErrors.instructor ? 'border border-red-500' : '',
+                instructorsLoading ? 'opacity-50 cursor-not-allowed' : ''
               ]"
               @change="validateField('instructor')"
             >
-              <option value="" disabled>Select an instructor</option>
+              <option value="" disabled>
+                {{ instructorsLoading ? 'Loading instructors...' : 'Select an instructor' }}
+              </option>
               <option
                 v-for="(ins, index) in instructors"
                 :key="index"
@@ -161,18 +178,28 @@
           </div>
 
           <div class="flex flex-col gap-2 col-span-2">
-            <label for="packages" class="text-headingColor">Packages</label>
+            <label for="plans" class="text-headingColor">Subscription Plans</label>
             <select
-              v-model="formData.packages"
-              name="packages"
-              id="packages"
-              class="bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm"
+              v-model="formData.plans"
+              name="plans"
+              id="plans"
+              multiple
+              :disabled="plansLoading"
+              :class="[
+                'bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm min-h-20',
+                plansLoading ? 'opacity-50 cursor-not-allowed' : ''
+              ]"
             >
-              <option value="">Select Packages</option>
-              <option value="1">Package 1</option>
-              <option value="2">Package 2</option>
-              <option value="3">Package 3</option>
+              <option v-if="plansLoading" disabled>Loading plans...</option>
+              <option
+                v-for="plan in plans"
+                :key="plan.id"
+                :value="plan.id"
+              >
+                {{ plan.name }} - ${{ plan.price }}
+              </option>
             </select>
+            <p class="text-xs text-gray-400">Hold Ctrl/Cmd to select multiple plans</p>
           </div>
 
           <div class="flex flex-col gap-2 col-span-2">
@@ -255,18 +282,35 @@ const props = defineProps({
 });
 
 const { getInstructors } = useInstructors();
+const { getPlans } = usePlans();
 const instructors = ref([]);
+const plans = ref([]);
+const instructorsLoading = ref(true);
+const plansLoading = ref(true);
 
 //fetch instructors
 const fetchInstructors = async () => {
-  const data = await getInstructors();
-  if (data) {
-    instructors.value = data.data?.results;
+  instructorsLoading.value = true;
+  const { data, error } = await getInstructors();
+  if (data && !error) {
+    instructors.value = data.results || [];
   }
+  instructorsLoading.value = false;
+};
+
+//fetch plans
+const fetchPlans = async () => {
+  plansLoading.value = true;
+  const { data, error } = await getPlans();
+  if (data && !error) {
+    plans.value = data.results || data || [];
+  }
+  plansLoading.value = false;
 };
 
 onMounted(() => {
   fetchInstructors();
+  fetchPlans();
 });
 
 const router = useRouter();
@@ -296,8 +340,8 @@ const formData = ref({
   name: "",
   description: "",
   instructor: "",
-  packages: "",
-  image: "",
+  plans: [],
+  photo: "",
   published: props.moduleData?.published || false,
 });
 
@@ -403,9 +447,9 @@ const initializeForm = () => {
     formData.value = {
       name: props.moduleData.name || "",
       description: props.moduleData.description || "",
-      instructor: props.moduleData.instructor || "",
-      packages: props.moduleData.packages || "",
-      image: props.moduleData.image || "",
+      instructor: props.moduleData?.instructor,
+      plans: props.moduleData.plans,
+      photo: props.moduleData.photo || "",
       published: props.moduleData.published || false,
     };
   } else {
@@ -414,8 +458,8 @@ const initializeForm = () => {
       name: "",
       description: "",
       instructor: "",
-      packages: "",
-      image: "",
+      plans: [],
+      photo: "",
       published: false,
     };
   }
@@ -478,6 +522,11 @@ const saveModule = async (isDraft = true) => {
       published: !isDraft,
     };
 
+    // Remove photo key if no photo is selected
+    if (!modulePayload.photo) {
+      delete modulePayload.photo;
+    }
+
     let result;
     if (props.mode === "create") {
       result = await createModule(modulePayload);
@@ -488,8 +537,12 @@ const saveModule = async (isDraft = true) => {
     if (result.error) {
       error.value = result.error;
     } else {
-      // Success - redirect to modules page
-      router.push("/modules");
+      // Success - stay on current page for edit mode, redirect for create mode
+      if (props.mode === "create") {
+        router.push("/modules");
+      }
+      // For edit mode, just clear the error to show success
+      error.value = null;
     }
   } catch (err) {
     error.value = "An unexpected error occurred";
@@ -507,5 +560,25 @@ const publishModule = () => {
 // Save as draft (no validation required)
 const saveDraft = () => {
   saveModule(true);
+};
+
+// Image preview
+const imagePreview = ref('');
+
+// Handle file upload
+const handleFileUpload = (event) => {
+  const target = event.target;
+  const file = target.files?.[0];
+  
+  if (file) {
+    formData.value.photo = file;
+    
+    // Create preview URL
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      imagePreview.value = e.target?.result;
+    };
+    reader.readAsDataURL(file);
+  }
 };
 </script>

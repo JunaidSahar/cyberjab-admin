@@ -100,13 +100,30 @@ export const useModules = () => {
     }
 
     try {
+      const hasFile = moduleData.photo instanceof File;
+      
+      let body;
+      let headers: any = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      if (hasFile) {
+        const formData = new FormData();
+        Object.keys(moduleData).forEach(key => {
+          if (moduleData[key] !== null && moduleData[key] !== undefined) {
+            formData.append(key, moduleData[key]);
+          }
+        });
+        body = formData;
+      } else {
+        headers["Content-Type"] = "application/json";
+        body = moduleData;
+      }
+
       const res = await $fetch(`${config.public.API_BASE_URL}api/lms/modules/`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: moduleData,
+        headers,
+        body,
         credentials: "include",
       });
       return { data: res, error: null };
@@ -124,13 +141,30 @@ export const useModules = () => {
     }
 
     try {
+      const hasFile = moduleData.photo instanceof File;
+      
+      let body;
+      let headers: any = {
+        Authorization: `Bearer ${token}`,
+      };
+
+      if (hasFile) {
+        const formData = new FormData();
+        Object.keys(moduleData).forEach(key => {
+          if (moduleData[key] !== null && moduleData[key] !== undefined) {
+            formData.append(key, moduleData[key]);
+          }
+        });
+        body = formData;
+      } else {
+        headers["Content-Type"] = "application/json";
+        body = moduleData;
+      }
+
       const res = await $fetch(`${config.public.API_BASE_URL}api/lms/modules/${moduleSlug}/`, {
         method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: moduleData,
+        headers,
+        body,
         credentials: "include",
       });
       return { data: res, error: null };

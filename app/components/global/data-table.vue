@@ -42,7 +42,7 @@
                   />
                 </th>
                 <th
-                  v-for="col in columns"
+                  v-for="col in columns as any"
                   :key="col.key"
                   :class="[
                     'px-6 py-3 font-medium text-sm',
@@ -56,7 +56,7 @@
             </thead>
             <tbody>
               <tr
-                v-for="(row, rowIdx) in data"
+                v-for="(row, rowIdx) in data as any"
                 :key="rowIdx"
                 class="bg-darkForground text-headingColor"
               >
@@ -68,7 +68,7 @@
                   />
                 </td>
                 <td
-                  v-for="col in columns"
+                  v-for="col in columns as any"
                   :key="col.key"
                   :class="[
                     'px-6 py-4 text-sm whitespace-nowrap',
@@ -207,3 +207,11 @@ function handleImageError(event: Event) {
   // The fallback initials div will show instead
 }
 </script>
+}
+
+// Handle image loading errors by hiding the broken image
+function handleImageError(event: Event) {
+  const img = event.target as HTMLImageElement;
+  img.style.display = 'none';
+  // The fallback initials div will show instead
+}

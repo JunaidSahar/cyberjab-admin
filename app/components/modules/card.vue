@@ -1,16 +1,16 @@
 <template>
-    <div class="bg-darkForground rounded-bl-xl rounded-br-xl">
+    <div class="bg-darkForground rounded-xl overflow-hidden flex flex-col">
         <img :src="module?.image || '/module-1.png'" :alt="module?.name || 'Module image'" class="w-full h-48 object-cover">
-        <div class="space-y-2 p-4 min-h-48">
+        <div class="space-y-2 p-4 min-h-48 flex flex-col h-full">
             <h3 class="font-bold text-headingColor text-lg">{{ module?.name || 'Untitled Module' }}</h3>
-            <p class="text-headingColor text-sm">{{ truncatedDescription }}</p>
+            <p class="text-headingColor text-sm flex-1">{{ truncatedDescription }}</p>
             <div class="flex items-center gap-2 text-xs text-gray-400">
                 <span>Created: {{ formatDate(module?.created_at) }}</span>
                 <span v-if="module?.updated_at">• Updated: {{ formatDate(module?.updated_at) }}</span>
             </div>
         </div>
         <div class="relative flex justify-between items-center bg-[#292D32] px-4 py-2 border-[#303347] border-r-2 border-b-2 border-l-2 rounded-bl-xl rounded-br-xl">
-            <p class="text-headingColor italic capitalize">{{ module?.status || 'Draft' }}</p>
+            <p class="text-headingColor italic capitalize">{{ module?.published ? 'Published' : 'Draft' }}</p>
             <div @click="hovered = !hovered" class="flex justify-center items-center hover:bg-darkBackground rounded-full w-8 h-8 cursor-pointer">
                 <Icon name="tabler:dots-vertical" class="w-5 h-5 text-headingColor" />
             </div>
@@ -25,7 +25,7 @@
                 </div>
                 <div @click="toggleStatus" class="flex items-center gap-1 hover:bg-darkBackground p-1 rounded-lg text-headingColor text-sm transition-all cursor-pointer">
                     <Icon name="material-symbols:arrow-upload-progress" />
-                    <span>{{ module?.status === 'published' ? 'Unpublish' : 'Publish' }}</span>
+                    <span>{{ module?.published ? 'Unpublish' : 'Publish' }}</span>
                 </div>
             </div>
         </div>

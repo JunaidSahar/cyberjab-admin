@@ -298,7 +298,7 @@ const formData = ref({
   instructor: "",
   packages: "",
   image: "",
-  status: "draft",
+  published: props.moduleData?.published || false,
 });
 
 // Validation state
@@ -406,7 +406,7 @@ const initializeForm = () => {
       instructor: props.moduleData.instructor || "",
       packages: props.moduleData.packages || "",
       image: props.moduleData.image || "",
-      status: props.moduleData.status || "draft",
+      published: props.moduleData.published || false,
     };
   } else {
     // Reset form for create mode
@@ -416,7 +416,7 @@ const initializeForm = () => {
       instructor: "",
       packages: "",
       image: "",
-      status: "draft",
+      published: false,
     };
   }
 
@@ -475,7 +475,7 @@ const saveModule = async (isDraft = true) => {
   try {
     const modulePayload = {
       ...formData.value,
-      status: isDraft ? "draft" : "published",
+      published: !isDraft,
     };
 
     let result;

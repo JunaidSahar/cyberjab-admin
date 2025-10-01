@@ -10,14 +10,13 @@
     </div>
     <div class="gap-4 grid grid-cols-2">
         <ClientOnly>
-
             <Chart />
         </ClientOnly>
         <DashboardTopPerformance />
     </div>
 
     <div class="pt-6">
-        <h3 class="text-headingColor text-2xl">Recently created modules</h3>
+        <h3 class="text-headingColor text-2xl pb-2">Recently published modules</h3>
         <ClientOnly>
             <div v-if="modulesLoading" class="flex items-center gap-4">
                 <div v-for="i in 4" :key="i" class="animate-pulse bg-gray-200 rounded-lg max-w-sm min-h-60"></div>
@@ -26,7 +25,7 @@
                 Error loading modules: {{ modulesError }}
             </div>
             <div v-else-if="recentModules && recentModules.length > 0" class="flex items-center gap-4 overflow-x-auto">
-                <DashboardModuleCard v-for="module in recentModules?.slice(0, 4)" :key="module.id" :module="module" />
+                <ModuleCard v-for="module in recentModules?.slice(0, 4)" :key="module.id" :module="module" />
             </div>
             <div v-else class="text-gray-500 p-4">
                 No modules found. <NuxtLink to="/modules" class="text-blue-500 hover:underline">Create your first module</NuxtLink>
@@ -42,6 +41,8 @@
 </template>
 
 <script setup>
+import ModuleCard from '~/components/modules/card.vue'
+
 const userStore = useUserStore()
 const { getRecentModules } = useModules()
 

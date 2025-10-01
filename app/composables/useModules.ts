@@ -14,11 +14,14 @@ export const useModules = () => {
       const queryParams: any = {
         page,
         page_size: pageSize,
+        published: 'all',
       };
 
       // Add optional filters
       if (filters.search) queryParams.search = filters.search;
-      if (filters.status) queryParams.status = filters.status;
+      if (filters.published !== undefined && filters.published !== 'all') {
+        queryParams.published = filters.published;
+      }
       if (filters.ordering) queryParams.ordering = filters.ordering;
 
       const res = await $fetch(`${config.public.API_BASE_URL}api/lms/modules/`, {
@@ -53,7 +56,8 @@ export const useModules = () => {
         },
         query: {
           page: 1,
-          page_size: 5,
+          page_size: 4,
+          published: true,
           ordering: "-created_at", // Order by creation date, newest first
         },
         credentials: "include",
@@ -158,8 +162,8 @@ export const useModules = () => {
     }
   };
 
-  // Toggle module status
-  const toggleModuleStatus = async (moduleSlug: string, status: string) => {
+  // Toggle module published status
+  const toggleModuleStatus = async (moduleSlug: string, published: boolean) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -173,7 +177,7 @@ export const useModules = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
-        body: { status },
+        body: { published },
         credentials: "include",
       });
       return { data: res, error: null };

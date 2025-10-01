@@ -41,16 +41,16 @@
           name="streamline:interface-search-glass-search-magnifying"
         />
       </div>
-      <select
+      <!-- Commented this because we are using tabs -->
+      <!-- <select
         v-model="selectedFilter"
         @change="fetchModules"
         class="block bg-darkForground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
       >
-        <option value="">All Statuses</option>
-        <option value="published">Published</option>
-        <option value="draft">Draft</option>
-        <option value="archived">Archived</option>
-      </select>
+        <option value="all">All Modules</option>
+        <option value="true">Published</option>
+        <option value="false">Draft</option>
+      </select> -->
       <select
         v-model="sortBy"
         @change="fetchModules"
@@ -58,8 +58,8 @@
       >
         <option value="-created_at">Newest First</option>
         <option value="created_at">Oldest First</option>
-        <option value="title">Title A-Z</option>
-        <option value="-title">Title Z-A</option>
+        <option value="name">Name A-Z</option>
+        <option value="-name">Name Z-A</option>
         <option value="-updated_at">Recently Updated</option>
       </select>
     </div>
@@ -185,8 +185,8 @@ const fetchModules = async () => {
       filters.search = searchQuery.value
     }
     
-    if (selectedFilter.value) {
-      filters.status = selectedFilter.value
+    if (selectedFilter.value && selectedFilter.value !== 'all') {
+      filters.published = selectedFilter.value === 'true'
     }
     
     const { data, error: fetchError } = await getModules(currentPage.value, 12, filters)
@@ -243,11 +243,11 @@ const deleteModule = async (module) => {
 }
 
 const toggleModuleStatus = async (module) => {
-  const newStatus = module.status === 'published' ? 'draft' : 'published'
+  const newPublishedStatus = !module.published
   
   const { error: updateError } = await updateModule(module.slug, {
     ...module,
-    status: newStatus
+    published: newPublishedStatus
   })
   
   if (updateError) {
@@ -261,11 +261,11 @@ const toggleModuleStatus = async (module) => {
 // Watch for tab changes
 watch(activeButton, (newTab) => {
   if (newTab === 'published') {
-    selectedFilter.value = 'published'
+    selectedFilter.value = 'true'
   } else if (newTab === 'unpublished') {
-    selectedFilter.value = 'draft'
+    selectedFilter.value = 'false'
   } else {
-    selectedFilter.value = ''
+    selectedFilter.value = 'all'
   }
   currentPage.value = 1
   fetchModules()

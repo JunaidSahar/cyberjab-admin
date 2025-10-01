@@ -55,7 +55,13 @@ export const useFeature = () => {
 ### Query Parameters
 - **Pagination**: Standard `page` and `page_size` parameters
 - **Filtering**: Use `published` boolean field (true/false) or 'all' for all modules
-- **Ordering**: Use `-created_at` for newest-first sorting
+- **Ordering**: Dynamic ordering via `ordering` parameter (e.g., `name`, `-created_at`, `-updated_at`)
+
+### Module API Fields
+- **instructor**: Object with id, name, email (nullable)
+- **plans**: Array of subscription plan objects (can be empty)
+- **photo**: String URL for module cover image (nullable)
+- **published**: Boolean field for publication status
 
 ## State Management Patterns
 

@@ -2,11 +2,11 @@
   <div class="w-full h-full">
     <div class="flex justify-between items-center w-full">
       <h1 class="text-headingColor text-3xl">Learning Paths</h1>
-       <NuxtLink 
-        to="/modules/create" 
+      <NuxtLink
+        to="/learning-paths/create"
         class="flex items-center gap-2 bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] hover:opacity-90 px-4 py-2 rounded-lg text-white transition-opacity"
       >
-      <Icon name="material-symbols:add" />
+        <Icon name="material-symbols:add" />
         Create
       </NuxtLink>
     </div>
@@ -27,12 +27,46 @@
     </div>
 
     <div class="items-center gap-6 grid grid-cols-3 pt-5">
-      <LazyLearningPathCards v-for="(learningPath, index) in currentLearningPaths" :key="index" :learning-path="learningPath" />
+      {{ currentLearningPaths }}
+      <template v-for="index in 3" :key="index" v-if="isLoading">
+        <CardSkeleton />
+      </template>
+      <LazyLearningPathCards
+        v-else-if="currentLearningPaths.length > 0"
+        v-for="(learningPath, index) in currentLearningPaths"
+        :key="learningPath.id"
+        :title="learningPath?.name"
+        :role="learningPath?.type"
+        :module_count="learningPath?.module_count"
+        :duration_days="learningPath?.duration_days"
+        :slug="learningPath?.slug"
+      />
+
+      <div v-else>
+        <p class="text-headingColor text-2xl text-center">
+          No Learning Paths Found
+        </p>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
+import { useLearningPath } from "@/composables/useLearningPaths";
+import CardSkeleton from "~/components/learning-path/card-skeleton.vue";
+const isLoading = ref(false);
+const router = useRouter();
+
+const { getLearningPaths } = useLearningPath();
+
+onMounted(async () => {
+  isLoading.value = true;
+  const { data, error } = await getLearningPaths();
+  if (data) {
+    currentLearningPaths.value = data.results;
+    isLoading.value = false;
+  }
+});
 
 const activeButton = ref("all");
 const tabs = ref([
@@ -53,22 +87,5 @@ const tabs = ref([
   },
 ]);
 
-const currentLearningPaths = ref([
-  {
-    slug: "system-administrator",
-    name: "System Administrator",
-    status: "Role",
-    icon: "clarity:administrator-line",
-    modules: ["id"],
-    totalDuration: 45
-  },
-  {
-    slug: "frontend-development",
-    name: "Frontend Development",
-    status: "Role",
-    icon: "mdi:code-braces",
-    modules: ["id", "id", "id"],
-    totalDuration: 145
-  }
-]) 
+const currentLearningPaths = ref([]);
 </script>

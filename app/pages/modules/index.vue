@@ -41,16 +41,16 @@
           name="streamline:interface-search-glass-search-magnifying"
         />
       </div>
-      <!-- Commented this because we are using tabs -->
-      <!-- <select
-        v-model="selectedFilter"
+      <select
+        v-model="selectedLearningPath"
         @change="fetchModules"
         class="block bg-darkForground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
       >
-        <option value="all">All Modules</option>
-        <option value="true">Published</option>
-        <option value="false">Draft</option>
-      </select> -->
+        <option value="">All LearningPaths</option>
+        <option v-for="learningPath in learningPaths" :key="learningPath.id" :value="learningPath.slug">
+          {{ learningPath.name }}
+        </option>
+      </select>
       <select
         v-model="sortBy"
         @change="fetchModules"
@@ -137,16 +137,19 @@
 
 <script setup>
 import Card from '~/components/modules/card.vue';
+import { useLearningPath } from "@/composables/useLearningPaths";
 
 const router = useRouter()
 const { getModules, deleteModule: deleteModuleAPI, updateModule } = useModules()
 
 // State
 const modules = ref([])
+const learningPaths = ref([])
 const loading = ref(true)
 const error = ref(null)
 const searchQuery = ref('')
 const selectedFilter = ref('')
+const selectedLearningPath = ref('')
 const sortBy = ref('-created_at')
 const currentPage = ref(1)
 const totalPages = ref(1)
@@ -180,6 +183,10 @@ const fetchModules = async () => {
     const filters = {
       ordering: sortBy.value
     }
+
+    if(selectedLearningPath.value){
+      filters.roadmap = selectedLearningPath.value
+    }
     
     if (searchQuery.value) {
       filters.search = searchQuery.value
@@ -205,6 +212,16 @@ const fetchModules = async () => {
     loading.value = false
   }
 }
+
+const fetchLearningPaths = async()=>{
+  const { data, error: fetchError } = await useLearningPath().getLearningPaths()
+  if (fetchError) {
+    error.value = fetchError
+  } else {
+    learningPaths.value = data?.results || []
+  }
+};
+
 
 // Debounced search
 let searchTimeout
@@ -274,5 +291,6 @@ watch(activeButton, (newTab) => {
 // Initialize
 onMounted(() => {
   fetchModules()
+  fetchLearningPaths()
 })
 </script>

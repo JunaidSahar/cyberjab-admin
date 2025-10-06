@@ -27,7 +27,6 @@
     </div>
 
     <div class="items-center gap-6 grid grid-cols-3 pt-5">
-      {{ currentLearningPaths }}
       <template v-for="index in 3" :key="index" v-if="isLoading">
         <CardSkeleton />
       </template>

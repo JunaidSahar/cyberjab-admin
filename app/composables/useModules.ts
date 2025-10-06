@@ -19,10 +19,9 @@ export const useModules = () => {
 
       // Add optional filters
       if (filters.search) queryParams.search = filters.search;
-      if (filters.published !== undefined && filters.published !== 'all') {
-        queryParams.published = filters.published;
-      }
+      if (filters.published !== undefined && filters.published !== 'all') queryParams.published = filters.published;
       if (filters.ordering) queryParams.ordering = filters.ordering;
+      if (filters.roadmap) queryParams.roadmap = filters.roadmap;
 
       const res = await $fetch(`${config.public.API_BASE_URL}api/lms/modules/`, {
         method: "GET",

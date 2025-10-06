@@ -18,12 +18,11 @@
     <div class="flex justify-between items-center pt-16">
       <div class="flex items-center gap-2 text-[#B2BBC6] text-sm">
         <p>{{ props?.module_count }} Module</p>
-        <p class="flex items-center gap-1">
+        <p v-if="Number(props?.duration_days) > 0" class="flex items-center gap-1">
           <Icon name="mingcute:time-duration-line" />
-          <span v-if="Number(props?.duration_days) > 0">
+          <span>
             {{ props?.duration_days }} Duration Days
           </span>
-          <span v-else> Duration Not Specified </span>
         </p>
       </div>
       <NuxtLink :to="'/learning-paths/' + props?.slug">

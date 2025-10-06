@@ -4,7 +4,6 @@ import CreateEditModule from "~/components/modules/create-edit-module.vue";
 const route = useRoute();
 const router = useRouter();
 const { getModule } = useModules();
-const { getInstructors } = useInstructors();
 
 // Determine if we're in create or edit mode
 const isCreateMode = computed(() => route.params.slug === "create");

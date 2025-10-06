@@ -1,14 +1,18 @@
 <template>
     <div class="bg-darkForground rounded-xl overflow-hidden flex flex-col">
-        <img :src="module?.photo || '/module-1.png'" :alt="module?.name || 'Module image'" class="w-full h-48 object-cover">
+        <NuxtImg
+          :src="module?.photo || '/images/courseImage.png'"
+          :alt="module?.name || 'Module image'"
+          class="w-full h-48 object-cover"
+        />
         <div class="space-y-2 p-4 min-h-48 flex flex-col h-full">
             <h3 class="font-bold text-headingColor text-lg">{{ module?.name || 'Untitled Module' }}</h3>
             <p class="text-headingColor text-sm flex-1">{{ truncatedDescription }}</p>
             <div v-if="module?.instructor" class="text-xs text-blue-400">
-                Instructor: {{ module.instructor.name }}
+                Instructor: {{ module.instructor.first_name }} {{ module.instructor.last_name }}
             </div>
             <div v-if="module?.plans?.length" class="text-xs text-green-400">
-                Plans: {{ module.plans.map(p => p.name).join(', ') }}
+                Plans: {{ module.plans.map(p => p).join(', ') }}
             </div>
             <div class="flex items-center gap-2 text-xs text-gray-400">
                 <span>Created: {{ formatDate(module?.created_at) }}</span>
@@ -21,10 +25,10 @@
                 <Icon name="tabler:dots-vertical" class="w-5 h-5 text-headingColor" />
             </div>
             <div v-if="hovered" class="-top-28 right-0 absolute space-y-1 bg-[#292D32] p-2 rounded-xl">
-                <div @click="editModule" class="flex items-center gap-1 hover:bg-darkBackground p-1 rounded-lg text-headingColor text-sm transition-all cursor-pointer">
+                <NuxtLink :to="`/modules/${module?.slug}`" class="flex items-center gap-1 hover:bg-darkBackground p-1 rounded-lg text-headingColor text-sm transition-all cursor-pointer">
                     <Icon name="material-symbols:edit-outline" />
                     <span>Edit</span>
-                </div>
+                </NuxtLink>
                 <div @click="deleteModuleHandler" class="flex items-center gap-1 hover:bg-darkBackground p-1 rounded-lg text-red-400 text-sm transition-all cursor-pointer">
                     <Icon name="material-symbols:delete-outline-rounded" />
                     <span>Delete</span>
@@ -57,11 +61,6 @@ const truncatedDescription = computed(() => {
 const formatDate = (dateString) => {
   if (!dateString) return 'N/A'
   return new Date(dateString).toLocaleDateString()
-}
-
-const editModule = () => {
-  hovered.value = false
-  emit('edit', props.module)
 }
 
 const deleteModuleHandler = () => {

@@ -61,7 +61,6 @@ const fetchUsers = async () => {
 
 onMounted(fetchUsers);
 
-// ✅ Delete User Function
 // call this when DataTable emits "delete" with the row object
 async function handleDelete(row: any) {
   if (!confirm(`Are you sure you want to delete ${row.first_name} ${row.last_name || ''}?`)) return;

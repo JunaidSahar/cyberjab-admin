@@ -522,8 +522,8 @@ const saveModule = async (isDraft = true) => {
       published: !isDraft,
     };
 
-    // Remove photo key if no photo is selected
-    if (!modulePayload.photo) {
+    // Only include photo if it's a new File upload, not if it's an existing URL string
+    if (!modulePayload.photo || !(modulePayload.photo instanceof File)) {
       delete modulePayload.photo;
     }
 

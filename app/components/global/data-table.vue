@@ -2,6 +2,7 @@
   <div class="flex flex-col">
     <div class="-m-1.5 overflow-x-auto">
       <div class="inline-block p-1.5 min-w-full align-middle">
+        <!-- Top Action Buttons -->
         <div
           v-if="selectedRows.length"
           class="flex justify-end gap-2 mb-6 w-full"
@@ -30,6 +31,8 @@
             Active
           </button>
         </div>
+
+        <!-- Table -->
         <div class="overflow-x-auto overflow-y-visible">
           <table class="min-w-full">
             <thead>
@@ -44,7 +47,7 @@
                 <th
                   v-for="col in columns as any"
                   :key="col.key"
-                  :class="[
+                  :class="[ 
                     'px-6 py-3 font-medium text-sm',
                     col.align === 'end' ? 'text-end' : 'text-start',
                   ]"
@@ -70,13 +73,14 @@
                 <td
                   v-for="col in columns as any"
                   :key="col.key"
-                  :class="[
+                  :class="[ 
                     'px-6 py-4 text-sm whitespace-nowrap',
                     col.align === 'end'
                       ? 'text-end font-medium'
                       : 'font-medium',
                   ]"
                 >
+                  <!-- Profile Image -->
                   <template v-if="col.key === 'profile_image'">
                     <div class="flex items-center justify-center">
                       <img
@@ -94,6 +98,8 @@
                       </div>
                     </div>
                   </template>
+
+                  <!-- Action Menu -->
                   <template v-else-if="col.key === 'action'">
                     <DropdownMenu
                       :options="[
@@ -110,11 +116,14 @@
                         }
                       ]"
                       @action="(action: any) => handleRowAction(action, row)"
+                      
                     />
                   </template>
+
+                  <!-- Status Badge -->
                   <template v-else-if="col.key === 'status'">
                     <div
-                      :class="`px-3 py-1 text-sm w-fit text-darkBackground rounded-full ${
+                      :class="`px-3 py-1 text-sm w-fit text-darkBackground rounded-full font-medium ${
                         row.status === 'Active' || row.status == 'Paid'
                           ? 'bg-green-400'
                           : 'bg-yellow-400'
@@ -123,6 +132,8 @@
                       {{ row[col.key] }}
                     </div>
                   </template>
+
+                  <!-- Normal Cell -->
                   <template v-else>
                     {{ row[col.key] }}
                   </template>
@@ -138,6 +149,7 @@
 
 <script setup lang="ts">
 import { ref, computed } from "vue";
+import { useRouter } from "vue-router";
 
 const props = defineProps({
   columns: {
@@ -177,41 +189,46 @@ function toggleSelectAll(e: Event) {
 }
 
 function emitSelectedAction() {
-  // Emit the selected rows' data
   const selectedData = selectedRows.value.map((idx) => props.data[idx]);
-  // You can change 'selected-action' to any event name you want
-  // Listen to this event in parent: @selected-action="yourHandler"
-  // Or replace with your logic here
-  // Example: $emit('selected-action', selectedData)
-  // For <script setup>, use defineEmits:
   emit("selected-action", selectedData);
 }
 
-const emit = defineEmits(["selected-action", "action"]);
+const emit = defineEmits(["selected-action", "action", "delete"]);
 
+// at top of script
+
+const router = useRouter();
+
+// inside functions
 function handleRowAction(action: string, row: any) {
+  if (action === "edit") {
+    // forward edit action to parent (parent will navigate)
+    emit("action", { action: "edit", row });
+    return;
+  }
+
+  if (action === "delete") {
+    // emit a delete event with the row object -> parent handles API + UI removal
+    emit("delete", row);
+    return;
+  }
+
+  // any other action
   emit("action", { action, row });
 }
 
-// Helper function to generate initials from first and last name
+
+
+// Helper to show initials if no image
 function getInitials(firstName: string, lastName: string): string {
   const first = firstName ? firstName.charAt(0).toUpperCase() : '';
   const last = lastName ? lastName.charAt(0).toUpperCase() : '';
   return first + last || '?';
 }
 
-// Handle image loading errors by hiding the broken image
+// Hide broken images
 function handleImageError(event: Event) {
   const img = event.target as HTMLImageElement;
   img.style.display = 'none';
-  // The fallback initials div will show instead
 }
 </script>
-}
-
-// Handle image loading errors by hiding the broken image
-function handleImageError(event: Event) {
-  const img = event.target as HTMLImageElement;
-  img.style.display = 'none';
-  // The fallback initials div will show instead
-}

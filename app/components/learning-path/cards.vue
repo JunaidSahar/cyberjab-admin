@@ -1,4 +1,4 @@
-<template>
+ <template>
   <div
     class="bg-darkForground hover:shadow-lg p-5 rounded-xl transition-all hover:-translate-x-1 hover:-translate-y-1 cursor-pointer"
   >

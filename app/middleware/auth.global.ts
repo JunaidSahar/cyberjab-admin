@@ -3,19 +3,16 @@ import { useAuth } from "~/composables/useAuth";
 
 export default defineNuxtRouteMiddleware(async (to) => {
   // Skip middleware on server-side rendering to avoid store initialization issues
-  if (import.meta.server) {
-    return;
-  }
+  if (import.meta.server) return;
 
   let userStore;
   let authComposable;
-  
+
   try {
     userStore = useUserStore();
     authComposable = useAuth();
   } catch (error) {
-    // If stores aren't ready yet, skip middleware
-    console.warn('Auth middleware: Stores not ready yet, skipping...');
+    console.warn("Auth middleware: Stores not ready yet, skipping...");
     return;
   }
 
@@ -24,78 +21,90 @@ export default defineNuxtRouteMiddleware(async (to) => {
   // Initialize auth state from cookies
   initializeAuth();
 
-  // Get access token from cookie
-  const accessTokenCookie = useCookie('access_token');
-  const refreshTokenCookie = useCookie('refresh_token');
+  // Cookies
+  const accessTokenCookie = useCookie("access_token");
+  const refreshTokenCookie = useCookie("refresh_token");
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/login'];
+  const publicRoutes = ["/login", "/register"];
+  const authPages = ["/login", "/register"];
 
-  // Check if current route needs authentication (all routes except public ones)
-  const requiresAuth = !publicRoutes.includes(to.path);
+  // Check if current route needs authentication (safe match for query params)
+  const requiresAuth = !publicRoutes.some((route) => to.path.startsWith(route));
 
-  // Check if we have any authentication tokens
+  // Tokens
   const hasAccessToken = !!accessTokenCookie.value;
   const hasRefreshToken = !!refreshTokenCookie.value;
 
-  // If we have tokens but user store isn't authenticated, sync the state
-  if (hasAccessToken && !userStore.isAuthenticated && accessTokenCookie.value) {
+  // Sync token state if cookie exists but store not set
+  if (hasAccessToken && !userStore.isAuthenticated) {
     userStore.token = accessTokenCookie.value;
     userStore.isAuthenticated = true;
   }
 
-  // Try to refresh token if we have refresh token but no access token
+  // Try to refresh token if needed
   if (!hasAccessToken && hasRefreshToken && requiresAuth) {
     const { data: newAccessToken, error } = await refreshAccessToken();
     if (error) {
-      console.error('Failed to refresh token:', error);
+      console.error("Failed to refresh token:", error);
       userStore.clearAuth();
-      return navigateTo('/login?message=access_required');
+      if (!to.path.startsWith("/login")) {
+        return navigateTo("/login?message=access_required");
+      }
     }
   }
 
-  // If user is authenticated but user data is not loaded, fetch it
+  // Fetch user if authenticated but user data not loaded
   if (userStore.isAuthenticated && hasAccessToken && !userStore.user) {
     const { data, error } = await getUser();
 
     if (data) {
-      console.log('User data fetched successfully:', data);
       userStore.setUser(data);
     } else if (error) {
-      console.error('Failed to fetch user data:', error);
-      // Try to refresh token once before giving up
+      console.error("Failed to fetch user data:", error);
+
+      // Try refresh token once before logging out
       if (hasRefreshToken) {
         const { data: newAccessToken, error: refreshError } = await refreshAccessToken();
         if (!refreshError) {
-          // Retry getting user data with new token
           const { data: retryData, error: retryError } = await getUser();
           if (retryData) {
             userStore.setUser(retryData);
           } else {
             userStore.clearAuth();
-            return navigateTo('/login?message=access_required');
+            if (!to.path.startsWith("/login")) {
+              return navigateTo("/login?message=access_required");
+            }
           }
         } else {
           userStore.clearAuth();
-          return navigateTo('/login?message=access_required');
+          if (!to.path.startsWith("/login")) {
+            return navigateTo("/login?message=access_required");
+          }
         }
       } else {
         userStore.clearAuth();
-        return navigateTo('/login');
+        if (!to.path.startsWith("/login")) {
+          return navigateTo("/login");
+        }
       }
     }
   }
 
-  // Redirect to login if accessing protected route while not authenticated
-  if (requiresAuth && !userStore.isAuthenticated) {
-    console.log('Protected route accessed without auth, redirecting to login');
-    return navigateTo('/login?message=access_required');
+  // Prevent infinite redirect loop (login <-> protected page)
+  if (to.path.startsWith("/login") && !userStore.isAuthenticated) {
+    return; // stop further redirect check
   }
 
-  // Prevent authenticated users from accessing auth pages
-  const authPages = ['/login', '/register'];
-  if (userStore.isAuthenticated && authPages.includes(to.path)) {
-    console.log('Auth page accessed while logged in, redirecting to dashboard');
-    return navigateTo('/');
+  // Redirect unauthenticated users trying to access protected routes
+  if (requiresAuth && !userStore.isAuthenticated) {
+    console.log("Protected route accessed without auth, redirecting to login");
+    return navigateTo("/login?message=access_required");
+  }
+
+  // Prevent authenticated users from accessing login/register
+  if (userStore.isAuthenticated && authPages.some((page) => to.path.startsWith(page))) {
+    console.log("Auth page accessed while logged in, redirecting to dashboard");
+    return navigateTo("/");
   }
 });

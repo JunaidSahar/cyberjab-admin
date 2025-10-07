@@ -202,13 +202,11 @@ const router = useRouter();
 // inside functions
 function handleRowAction(action: string, row: any) {
   if (action === "edit") {
-    // forward edit action to parent (parent will navigate)
     emit("action", { action: "edit", row });
     return;
   }
 
   if (action === "delete") {
-    // emit a delete event with the row object -> parent handles API + UI removal
     emit("delete", row);
     return;
   }

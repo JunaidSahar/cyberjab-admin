@@ -123,60 +123,126 @@
       </div>
 
       <!-- Modules Tab -->
-      <div v-else class="bg-[#1E1F23] rounded-md p-6">
-        <div class="flex h-screen">
-        <!-- Sidebar -->
-          <div class="w-64 bg-gray-800 p-4">
-              <h2 class="text-lg font-semibold mb-4">Python Programming</h2>
+      <div v-else>
+          <div class="flex bg-darkBackground text-headingColor">
+            <!-- Sidebar -->
+            <div class="w-[22rem] px-4">
+              <!-- 👆 fixed sidebar width -->
+              <h2 class="text-lg font-semibold mb-4"></h2>
               <ul class="space-y-2">
-                  <li class="flex items-center space-x-2">
-                      <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      <span>Step 1</span>
-                  </li>
-                  <li class="flex items-center space-x-2">
-                      <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      <span>Step 2</span>
-                      <span class="text-gray-400 ml-2">(5 min)</span>
-                  </li>
-                  <li class="flex items-center space-x-2">
-                      <span class="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      <span>Terminal</span>
-                      <span class="text-gray-400 ml-2">(5 min)</span>
-                  </li>
-              </ul>
-              <button class="mt-4 w-full bg-blue-600 text-white py-2 rounded">+ New Step</button>
-          </div>
+                <li class="flex justify-between  px-4 py-2 bg-[#1E1F23] rounded-lg">
+                  <div class="flex flex-col">
+                    <span>Python Programming</span>
+                    <span class="text-gray-400">5 module</span>
+                  </div>
+                  <div class="flex items-center gap-1 cursor-pointer hover:text-red-500">
+                    <Icon name="material-symbols:delete-outline-rounded" class="w-5 h-5" />
+                  </div>
+                </li>
 
-          <!-- Main Content -->
-          <div class="flex-1 p-6 overflow-y-auto">
-              <h1 class="text-2xl font-bold mb-6">Python Programming</h1>
-              <div class="grid grid-cols-2 gap-6">
-                  <!-- Card 1 -->
-                  <div class="bg-gray-800 rounded-lg overflow-hidden relative">
-                      <img src="https://via.placeholder.com/300x200" alt="Python Fundamentals" class="w-full">
-                      <div class="p-4">
-                          <h3 class="text-lg font-semibold">Python Fundamentals</h3>
-                          <p class="text-gray-400 text-sm mt-2">
-                              Product Management Masterclass: you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                          </p>
-                      </div>
-                      <div class="absolute bottom-2 right-2 text-gray-400 text-xs">Published</div>
+                <li class="flex justify-between  px-4 py-2 bg-[#1E1F23] rounded-lg">
+                  <div class="flex flex-col">
+                    <span>Step 2</span>
+                    <span class="text-gray-400">1 module</span>
                   </div>
-                  <!-- Card 2 -->
-                  <div class="bg-gray-800 rounded-lg overflow-hidden relative">
-                      <img src="https://via.placeholder.com/300x200" alt="Object Oriented with Python" class="w-full">
-                      <div class="p-4">
-                          <h3 class="text-lg font-semibold">Object Oriented with Python</h3>
-                          <p class="text-gray-400 text-sm mt-2">
-                              Product Management Masterclass: you will learn with Sarah Johnson - Head of Product Customer Platform Gojek Indonesia.
-                          </p>
-                      </div>
-                      <div class="absolute bottom-2 right-2 text-gray-400 text-xs">Published</div>
+                  <div class="flex items-center gap-1 cursor-pointer hover:text-red-500">
+                    <Icon name="material-symbols:delete-outline-rounded" class="w-5 h-5" />
                   </div>
+                </li>
+
+                <li class="flex justify-between  px-4 py-2 bg-[#1E1F23] rounded-lg">
+                  <div class="flex flex-col">
+                    <span>Terminal</span>
+                    <span class="text-gray-400">5 min</span>
+                  </div>
+                  <div class="flex items-center gap-1 cursor-pointer hover:text-red-500">
+                    <Icon name="material-symbols:delete-outline-rounded" class="w-5 h-5" />
+                  </div>
+                </li>
+              </ul>
+
+              <button
+                class="mt-4 w-full bg-[#1E1F23] hover:bg-[#25272B] text-white py-2 rounded-lg transition-all"
+              >
+                + New Step
+              </button>
+            </div>
+
+            <!-- Main Content -->
+            <div class="flex-1 bg-darkBackground text-white px-6 pt-4">
+              <!-- Heading -->
+              <div class="mb-6">
+                <h1
+                  class="text-3xl font-bold text-headingColor bg-[#1E1F23] py-2 px-4 rounded-xl"
+                >
+                  Python Programming
+                </h1>
               </div>
+
+              <!-- Cards container -->
+              <div class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <!-- Card -->
+                <div class="bg-darkForground rounded-xl overflow-hidden flex flex-col">
+                  <img
+                    src="/images/courseImage.png"
+                    alt="Python Fundamentals"
+                    class="w-full h-48 object-cover"
+                  />
+                  <div class="space-y-2 p-4 flex flex-col flex-1 pb-4">
+                    <h3 class="font-bold text-lg text-white">Python Fundamentals</h3>
+                    <p class="text-sm text-gray-300 flex-1">
+                      Product Management Masterclass, you will learn with Sarah Johnson -
+                      Head of Product Customer Platform Gojek Indonesia.
+                    </p>
+                  </div>
+
+                  
+                  <div
+                    class="relative flex justify-between items-center bg-[#292D32] px-4 py-2 border-[#303347] border-r-2 border-b-2 border-l-2 rounded-bl-xl rounded-br-xl"
+                  >
+                    <p class="text-gray-400 italic capitalize">Published</p>
+                    <div class="relative">
+                      <!-- Dots button -->
+                      <div
+                        @click="showMenu = !showMenu"
+                        class="flex justify-center items-center hover:bg-darkBackground rounded-full w-8 h-8 cursor-pointer"
+                      >
+                        <Icon name="tabler:dots-vertical" class="w-5 h-5 text-gray-400" />
+                      </div>
+
+                      <!-- Dropdown menu -->
+                      <div
+                        v-if="showMenu"
+                        class="absolute right-0 mt-2 w-36 bg-[#1E1F23] border border-[#303347] rounded-lg shadow-lg z-50"
+                      >
+                        <NuxtLink
+                          class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-headingColor text-sm transition-all cursor-pointer"
+                        >
+                          <Icon name="material-symbols:edit-outline" />
+                          <span>Edit</span>
+                        </NuxtLink>
+
+                        <div
+                          class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-red-400 text-sm transition-all cursor-pointer"
+                        >
+                          <Icon name="material-symbols:delete-outline-rounded" />
+                          <span>Delete</span>
+                        </div>
+
+                        <div
+                          class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-headingColor text-sm transition-all cursor-pointer"
+                        >
+                          <Icon name="material-symbols:arrow-upload-progress" />
+                          <span>Upload</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
     </div>
 
     <!-- ✅ Custom Toast -->
@@ -255,6 +321,13 @@ const handleSubmit = async () => {
     showToast("Network error while saving.", "error");
   }
 };
+
+const showMenu = ref(false);
+const closeMenu = () => (showMenu.value = false)
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.relative')) closeMenu()
+})
+
 </script>
 
 <style scoped>

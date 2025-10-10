@@ -24,7 +24,7 @@
           :class="[ 
             'px-4 py-2 text-lg font-medium',
             activeTab === 'settings'
-              ? 'border-b-4 border-headingColor text-headingColor font-semibold'
+              ? 'border-b-2 border-headingColor text-headingColor font-semibold'
               : 'text-[#B2BBC6]'
           ]"
         >
@@ -36,7 +36,7 @@
           :class="[ 
             'px-4 py-2 text-lg font-medium',
             activeTab === 'modules'
-              ? 'border-b-4 border-headingColor text-headingColor font-semibold'
+              ? 'border-b-2 border-headingColor text-headingColor font-semibold'
               : 'text-[#B2BBC6]'
           ]"
         >
@@ -147,7 +147,7 @@
                   <div class="flex items-center gap-3 flex-1">
                     <Icon
                       name="material-symbols:drag-indicator"
-                      class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing hover:text-blue-500 drag-handle"
+                      class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing drag-handle"
                     />
                     <div class="flex flex-col flex-1">
                       <span>{{ step.step_name }}</span>
@@ -217,10 +217,10 @@
                   class="relative flex justify-between items-center bg-[#292D32] px-4 py-2 border-[#303347] border-r-2 border-b-2 border-l-2 rounded-bl-xl rounded-br-xl"
                 >
                   <p class="text-gray-400 italic capitalize">{{ module.status || 'Published' }}</p>
-                  <div class="relative">
+                  <div class="relative module-menu">
                     <!-- Dots button -->
                     <div
-                      @click="toggleMenu(module.id)"
+                      @click.stop="toggleMenu(module.id)"
                       class="flex justify-center items-center hover:bg-darkBackground rounded-full w-8 h-8 cursor-pointer"
                     >
                       <Icon name="tabler:dots-vertical" class="w-5 h-5 text-gray-400" />
@@ -229,6 +229,7 @@
                     <!-- Dropdown menu -->
                     <div
                       v-if="activeMenuId === module.id"
+                      @click.stop
                       class="absolute right-0 mt-2 w-36 bg-[#1E1F23] border border-[#303347] rounded-lg shadow-lg z-50"
                     >
                       <NuxtLink
@@ -251,7 +252,7 @@
                         class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-headingColor text-sm transition-all cursor-pointer"
                       >
                         <Icon name="material-symbols:arrow-upload-progress" />
-                        <span>Publish</span>
+                        <span>Upload</span>
                       </div>
                     </div>
                   </div>
@@ -326,14 +327,15 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, onMounted, watch, onBeforeUnmount } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import draggable from "vuedraggable";
 
 const route = useRoute();
+const router = useRouter();
 const config = useRuntimeConfig();
 
-const activeTab = ref("settings");
+const activeTab = ref(route.query.tab || "settings");
 const isEditMode = route.params.slug !== "create";
 
 const form = ref({
@@ -390,6 +392,18 @@ const fetchRoadmapData = async () => {
   }
 };
 
+// ✅ Format steps for API submission
+const formatStepsForAPI = () => {
+  return steps.value.map((step, stepIndex) => ({
+    step_name: step.step_name,
+    step_order: stepIndex + 1,
+    modules: (step.modules || []).map((module, moduleIndex) => ({
+      id: module.id,
+      module_order: moduleIndex + 1
+    }))
+  }));
+};
+
 // ✅ Mounted - fetch data on load
 onMounted(() => {
   fetchRoadmapData();
@@ -422,10 +436,15 @@ const handleSubmit = async () => {
   const method = isEditMode ? "PUT" : "POST";
 
   try {
+    const payload = {
+      ...form.value,
+      steps: formatStepsForAPI()
+    };
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form.value),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) throw new Error("Save failed");
@@ -455,7 +474,14 @@ const deleteStep = async (step, index) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form.value,
-          steps: updatedSteps,
+          steps: updatedSteps.map((step, stepIndex) => ({
+            step_name: step.step_name,
+            step_order: stepIndex + 1,
+            modules: (step.modules || []).map((module, moduleIndex) => ({
+              id: module.id,
+              module_order: moduleIndex + 1
+            }))
+          }))
         }),
       }
     );
@@ -482,11 +508,26 @@ const deleteModule = async (module) => {
   try {
     // Update the selected step's modules
     const updatedModules = selectedStep.value.modules.filter(m => m.id !== module.id);
-    const updatedSteps = steps.value.map(step => 
-      step.step_name === selectedStep.value.step_name
-        ? { ...step, modules: updatedModules }
-        : step
-    );
+    const updatedSteps = steps.value.map((step, stepIndex) => {
+      if (step.step_name === selectedStep.value.step_name) {
+        return {
+          step_name: step.step_name,
+          step_order: stepIndex + 1,
+          modules: updatedModules.map((mod, modIndex) => ({
+            id: mod.id,
+            module_order: modIndex + 1
+          }))
+        };
+      }
+      return {
+        step_name: step.step_name,
+        step_order: stepIndex + 1,
+        modules: (step.modules || []).map((mod, modIndex) => ({
+          id: mod.id,
+          module_order: modIndex + 1
+        }))
+      };
+    });
     
     const res = await fetch(
       `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
@@ -530,6 +571,7 @@ const createNewStep = async () => {
   try {
     const newStep = {
       step_name: newStepName.value,
+      step_order: steps.value.length + 1,
       modules: []
     };
 
@@ -542,7 +584,14 @@ const createNewStep = async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form.value,
-          steps: updatedSteps,
+          steps: updatedSteps.map((step, stepIndex) => ({
+            step_name: step.step_name,
+            step_order: stepIndex + 1,
+            modules: (step.modules || []).map((module, moduleIndex) => ({
+              id: module.id,
+              module_order: moduleIndex + 1
+            }))
+          })),
         }),
       }
     );
@@ -558,8 +607,13 @@ const createNewStep = async () => {
   }
 };
 
-// ✅ Watch for tab changes to refresh data
+// ✅ Watch for tab changes to refresh data and update URL
 watch(activeTab, (newTab) => {
+  // Update URL query parameter
+  router.push({ 
+    query: { ...route.query, tab: newTab } 
+  });
+  
   if (newTab === 'modules' && isEditMode) {
     fetchRoadmapData();
   }
@@ -575,7 +629,7 @@ const onStepDragEnd = async () => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form.value,
-          steps: steps.value,
+          steps: formatStepsForAPI(),
         }),
       }
     );

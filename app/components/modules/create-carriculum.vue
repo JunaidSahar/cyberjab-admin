@@ -14,7 +14,7 @@
       </div>
       <div v-else-if="!lessons.length">
         <div
-          class="flex flex-col justify-center items-center gap-2 bg-darkForground rounded-xl min-h-72 text-headingColor/50 text-center"
+          class="flex flex-col justify-center items-center gap-2 bg-darkForeground rounded-xl min-h-72 text-headingColor/50 text-center"
         >
           <Icon
             name="material-symbols-light:nfc-off-outline-rounded"
@@ -36,7 +36,7 @@
       >
         <template #item="{ element: item, index }">
           <div
-            class="flex justify-between items-center bg-darkForground px-3 py-2 rounded-lg transition-all cursor-pointer"
+            class="flex justify-between items-center bg-darkForeground px-3 py-2 rounded-lg transition-all cursor-pointer"
             @click="selectCarriculum(item, index)"
             :class="
               selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''
@@ -80,7 +80,7 @@
       </draggable>
 
       <div
-        class="flex justify-center items-center gap-2 bg-darkForground hover:bg-darkForground/80 px-4 py-2 rounded-lg min-h-10 text-white transition-colors cursor-pointer"
+        class="flex justify-center items-center gap-2 bg-darkForeground hover:bg-darkForeground/80 px-4 py-2 rounded-lg min-h-10 text-white transition-colors cursor-pointer"
         @click="addNewLesson"
       >
         <Icon name="material-symbols:add" />
@@ -89,7 +89,7 @@
     </div>
 
     <!-- Lesson Editor -->
-    <div class="bg-darkForground p-6 rounded-xl w-[75%]">
+    <div class="bg-darkForeground p-6 rounded-xl w-[75%]">
       <div class="flex justify-between items-center pb-5">
         <h3 class="text-headingColor text-2xl">Lesson Information</h3>
       </div>

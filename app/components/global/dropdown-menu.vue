@@ -10,7 +10,7 @@
 
     <div
       v-if="isOpen"
-      class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-darkForground shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+      class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-darkForeground shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
       role="menu"
       aria-orientation="vertical"
       aria-labelledby="menu-button"

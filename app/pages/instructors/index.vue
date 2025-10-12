@@ -4,7 +4,7 @@
       <h1 class="text-headingColor text-3xl">Instructors</h1>
       <button
         @click="() => router.push('/instructors/create')"
-        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
+        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
       >
         <Icon name="material-symbols:add" />
         Create Instructor
@@ -13,7 +13,7 @@
     
     <div class="flex items-center gap-4 pt-5">
       <div
-        class="flex flex-1 items-center gap-2 bg-darkForground px-4 py-2 rounded-lg min-h-10"
+        class="flex flex-1 items-center gap-2 bg-darkForeground px-4 py-2 rounded-lg min-h-10"
       >
         <input
           v-model="searchQuery"
@@ -31,7 +31,7 @@
       <select
         v-model="statusFilter"
         @change="handleFilterChange"
-        class="block bg-darkForground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
+        class="block bg-darkForeground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
       >
         <option value="">All Status</option>
         <option value="true">Active</option>
@@ -70,7 +70,7 @@
           <button
             @click="goToPage(pagination.currentPage - 1)"
             :disabled="pagination.currentPage <= 1"
-            class="px-3 py-2 bg-darkForground text-headingColor rounded-lg disabled:opacity-50"
+            class="px-3 py-2 bg-darkForeground text-headingColor rounded-lg disabled:opacity-50"
           >
             Previous
           </button>
@@ -82,7 +82,7 @@
           <button
             @click="goToPage(pagination.currentPage + 1)"
             :disabled="pagination.currentPage >= Math.ceil(pagination.total / pagination.pageSize)"
-            class="px-3 py-2 bg-darkForground text-headingColor rounded-lg disabled:opacity-50"
+            class="px-3 py-2 bg-darkForeground text-headingColor rounded-lg disabled:opacity-50"
           >
             Next
           </button>

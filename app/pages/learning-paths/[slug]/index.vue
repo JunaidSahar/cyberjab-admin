@@ -199,7 +199,7 @@
               <div
                 v-for="module in selectedStep.modules"
                 :key="module.id"
-                class="bg-darkForground rounded-xl overflow-hidden flex flex-col"
+                class="bg-darkForeground rounded-xl overflow-hidden flex flex-col"
               >
                 <img
                   :src="module.image || '/images/courseImage.png'"

@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-darkForground rounded-xl overflow-hidden flex flex-col">
+    <div class="bg-darkForeground rounded-xl overflow-hidden flex flex-col">
         <NuxtImg
           :src="module?.photo || '/images/courseImage.png'"
           :alt="module?.name || 'Module image'"

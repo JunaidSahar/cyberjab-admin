@@ -27,7 +27,7 @@
 
     <div class="flex items-center gap-4 pt-5">
       <div
-        class="flex flex-1 items-center gap-2 bg-darkForground px-4 py-2 rounded-lg min-h-10"
+        class="flex flex-1 items-center gap-2 bg-darkForeground px-4 py-2 rounded-lg min-h-10"
       >
         <input
           v-model="searchQuery"
@@ -44,7 +44,7 @@
       <select
         v-model="selectedLearningPath"
         @change="fetchModules"
-        class="block bg-darkForground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
+        class="block bg-darkForeground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
       >
         <option value="">All LearningPaths</option>
         <option v-for="learningPath in learningPaths" :key="learningPath.id" :value="learningPath.slug">
@@ -54,7 +54,7 @@
       <select
         v-model="sortBy"
         @change="fetchModules"
-        class="block bg-darkForground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
+        class="block bg-darkForeground px-4 py-2 rounded-lg w-60 min-h-10 dark:text-neutral-400 text-sm disabled:pointer-events-none"
       >
         <option value="-created_at">Newest First</option>
         <option value="created_at">Oldest First</option>
@@ -100,7 +100,7 @@
             </p>
             <button
               @click="router.push('/modules/create')"
-              class="bg-[#292D32] hover:bg-darkForground px-6 py-3 rounded-lg font-semibold text-headingColor transition-all"
+              class="bg-[#292D32] hover:bg-darkForeground px-6 py-3 rounded-lg font-semibold text-headingColor transition-all"
             >
               Create Module
             </button>
@@ -117,7 +117,7 @@
         <button 
           @click="changePage(currentPage - 1)"
           :disabled="currentPage <= 1"
-          class="px-4 py-2 bg-darkForground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-darkForeground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Previous
         </button>
@@ -127,7 +127,7 @@
         <button 
           @click="changePage(currentPage + 1)"
           :disabled="currentPage >= totalPages"
-          class="px-4 py-2 bg-darkForground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          class="px-4 py-2 bg-darkForeground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Next
         </button>

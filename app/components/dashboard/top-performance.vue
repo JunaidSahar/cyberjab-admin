@@ -1,6 +1,6 @@
 <template>
   <div
-    class="bg-darkForground p-6 border border-border rounded-lg w-full"
+    class="bg-darkForeground p-6 border border-border rounded-lg w-full"
   >
     <div class="pb-5 text-headingColor">
       <h3 class="font-bold text-2xl">Top Performance</h3>

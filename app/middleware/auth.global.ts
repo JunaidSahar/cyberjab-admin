@@ -38,8 +38,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Sync token state if cookie exists but store not set
   if (hasAccessToken && !userStore.isAuthenticated) {
-    userStore.token = accessTokenCookie.value;
-    userStore.isAuthenticated = true;
+    if(accessTokenCookie.value) {
+      userStore.token = accessTokenCookie.value;
+      userStore.isAuthenticated = true;
+    }
   }
 
   // Try to refresh token if needed

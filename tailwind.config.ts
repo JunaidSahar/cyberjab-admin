@@ -13,7 +13,7 @@ export default {
         transparent: "transparent",
         darkBackground: "#15161A",
         border: "#222637",
-        darkForground: "#1E1F23",
+        darkForeground: "#1E1F23",
         headingColor: "#E2E2E2",
         primaryBlue: "#0800F7",
         flatWhite: "#FAFAFA",

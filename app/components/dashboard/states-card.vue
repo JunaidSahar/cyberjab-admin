@@ -1,6 +1,6 @@
 <template>
   <div
-    class="flex flex-col justify-between bg-darkForground p-6 border border-border rounded-lg w-full max-w-lg min-h-60"
+    class="flex flex-col justify-between bg-darkForeground p-6 border border-border rounded-lg w-full max-w-lg min-h-60"
   >
     <div class="flex items-center gap-3">
       <div

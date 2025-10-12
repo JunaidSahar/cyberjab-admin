@@ -12,7 +12,7 @@
 
     <div class="flex gap-6 pt-6 w-full">
       <!-- Profile Picture Section -->
-      <div class="flex flex-col items-center bg-darkForground p-6 rounded-xl w-[20%]">
+      <div class="flex flex-col items-center bg-darkForeground p-6 rounded-xl w-[20%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Profile Picture</h3>
         <div class="flex justify-center items-center bg-[#292D32] rounded-full w-60 min-h-60">
           <Icon
@@ -48,7 +48,7 @@
       </div>
 
       <!-- User Info Form -->
-      <div class="bg-darkForground p-6 rounded-xl w-[60%]">
+      <div class="bg-darkForeground p-6 rounded-xl w-[60%]">
         <h3 class="pb-5 text-headingColor text-2xl">User information</h3>
         <form @submit.prevent="submitForm" class="gap-5 grid grid-cols-2">
           <div class="flex flex-col gap-2 col-span-1">

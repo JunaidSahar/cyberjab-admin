@@ -1,6 +1,6 @@
 <template>
     <div class="z-50 fixed inset-0 flex justify-center items-center bg-black bg-opacity-50 transition-all">
-        <div class="bg-darkForground shadow-lg p-6 rounded-lg">
+        <div class="bg-darkForeground shadow-lg p-6 rounded-lg">
             <h2 class="mb-4 font-bold text-headingColor text-xl">{{ title }}</h2>
             <p class="mb-12 text-headingColor">{{ message }}</p>
             <div class="flex justify-end gap-3">

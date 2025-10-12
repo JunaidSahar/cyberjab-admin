@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-darkForground p-6 border border-border rounded-lg w-full">
+  <div class="bg-darkForeground p-6 border border-border rounded-lg w-full">
     <div class="pb-5 text-headingColor">
       <h3 class="font-bold text-2xl">Revenue</h3>
       <p class="text-sm"><span class="text-green-500">+24%</span> in past 30 days</p>

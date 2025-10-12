@@ -116,7 +116,7 @@ function handleAction({ action, row }: any) {
       <h1 class="text-headingColor text-3xl">Users</h1>
       <button
         @click="() => router.push('/users/create-user')"
-        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
+        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
       >
         <Icon name="material-symbols:add" />
         Create

@@ -1,6 +1,6 @@
  <template>
   <div
-    class="bg-darkForground hover:shadow-lg p-5 rounded-xl transition-all hover:-translate-x-1 hover:-translate-y-1 cursor-pointer"
+    class="bg-darkForeground hover:shadow-lg p-5 rounded-xl transition-all hover:-translate-x-1 hover:-translate-y-1 cursor-pointer"
   >
     <div class="flex justify-between items-center gap-2 w-full">
       <div>

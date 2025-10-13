@@ -12,7 +12,7 @@
     </div>
 
     <div class="flex gap-6 pt-6 w-full">
-      <div class="flex flex-col items-center bg-darkForground p-6 rounded-xl w-[20%]">
+      <div class="flex flex-col items-center bg-darkForeground p-6 rounded-xl w-[20%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Profile Picture</h3>
 
         <div class="flex justify-center items-center bg-[#292D32] rounded-full w-60 h-60 overflow-hidden">
@@ -35,7 +35,7 @@
           >
             <label
               for="photo-upload"
-              class="flex bg-darkForground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer"
+              class="flex bg-darkForeground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer"
             >
               {{ form.photo_url ? 'Change Photo' : 'Upload Photo' }}
             </label>
@@ -64,7 +64,7 @@
           </div>
         </div>
       </div>
-      <div class="bg-darkForground p-6 rounded-xl w-[60%]">
+      <div class="bg-darkForeground p-6 rounded-xl w-[60%]">
         <h3 class="pb-5 text-headingColor text-2xl">Instructor information</h3>
 
         <form @submit="handleSubmit" class="gap-5 grid grid-cols-2">

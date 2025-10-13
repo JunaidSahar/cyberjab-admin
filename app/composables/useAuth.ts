@@ -30,7 +30,6 @@ export const useAuth = () => {
         isAuthenticated: true,
         token: token,
       });
-      console.log(`Token set successfully: ${token}`)
       return { data: "Token set successfully", error: null };
     } catch (error: any) {
       return { error: error.message || "Failed to set authentication token", data: null };

@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-darkForground p-5 rounded-xl">
+  <div class="bg-darkForeground p-5 rounded-xl">
     <div class="flex justify-between items-center gap-2 w-full">
       <div class="flex flex-col gap-3">
         <p

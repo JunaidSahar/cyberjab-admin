@@ -20,7 +20,7 @@
           </button>
           <button
             type="button"
-            class="flex justify-center items-center gap-1 bg-darkForground px-5 rounded-xl w-auto h-10 text-white text-sm"
+            class="flex justify-center items-center gap-1 bg-darkForeground px-5 rounded-xl w-auto h-10 text-white text-sm"
             :disabled="selectedRows.length === 0"
             @click="emitSelectedAction"
           >
@@ -61,7 +61,7 @@
               <tr
                 v-for="(row, rowIdx) in data as any"
                 :key="rowIdx"
-                class="bg-darkForground text-headingColor"
+                class="bg-darkForeground text-headingColor"
               >
                 <td class="px-4 py-4">
                   <input

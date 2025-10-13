@@ -46,7 +46,7 @@
 
       <div class="flex items-center gap-2 pb-4" v-if="props.mode !== 'create'">
         <button
-          class="flex items-center gap-2 bg-darkForground px-5 py-2 rounded-lg text-white text-sm"
+          class="flex items-center gap-2 bg-darkForeground px-5 py-2 rounded-lg text-white text-sm"
         >
           <Icon name="mdi:eye-outline" />
           Preview
@@ -63,7 +63,7 @@
     </div>
 
     <div v-if="activeTab == 'settings'" class="flex gap-6 pt-6 w-full">
-      <div class="bg-darkForground p-6 rounded-xl w-[30%]">
+      <div class="bg-darkForeground p-6 rounded-xl w-[30%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Image</h3>
 
         <div class="bg-darkBackground rounded-lg w-full min-h-60 flex items-center justify-center overflow-hidden">
@@ -83,7 +83,7 @@
           <div
             class="group bg-gradient-to-r from-[#00B9FF] to-[#4E47FF] p-px rounded-lg w-fit"
           >
-            <label class="flex bg-darkForground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer">
+            <label class="flex bg-darkForeground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer">
               Upload Photo
               <input
                 type="file"
@@ -98,7 +98,7 @@
           </p>
         </div>
       </div>
-      <div class="bg-darkForground p-6 rounded-xl w-[70%]">
+      <div class="bg-darkForeground p-6 rounded-xl w-[70%]">
         <h3 class="pb-5 text-headingColor text-2xl">Module Information</h3>
 
         <form @submit.prevent="handleSubmit" class="gap-5 grid grid-cols-2">

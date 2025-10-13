@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen w-full text-headingColor bg-darkBackground relative">
-    <div class="max-w-4xl">
+    <div class="max-w-7xl">
       <!-- Back Link -->
       <div class="flex items-center gap-2 mb-2">
         <NuxtLink
@@ -18,11 +18,11 @@
       </h1>
 
       <!-- Tabs (only when editing) -->
-      <div v-if="isEditMode" class="flex border-b border-[#2E2F34] mb-6">
+      <div v-if="isEditMode" class="flex border-b border-[#2E2F34] space-x-12 mb-6">
         <button
           @click="activeTab = 'settings'"
           :class="[ 
-            'px-4 py-2 text-lg font-medium',
+            'py-2 text-lg font-medium',
             activeTab === 'settings'
               ? 'border-b-2 border-headingColor text-headingColor font-semibold'
               : 'text-[#B2BBC6]'
@@ -34,7 +34,7 @@
         <button
           @click="activeTab = 'modules'"
           :class="[ 
-            'px-4 py-2 text-lg font-medium',
+            'py-2 text-lg font-medium',
             activeTab === 'modules'
               ? 'border-b-2 border-headingColor text-headingColor font-semibold'
               : 'text-[#B2BBC6]'
@@ -104,7 +104,7 @@
             <label class="block mb-1 text-lg text-headingColor">Description</label>
             <textarea
               v-model="form.description"
-              rows="4"
+              rows="7"
               placeholder="Enter Description"
               class="w-full bg-darkBackground rounded-lg px-3 py-2.5 text-sm text-headingColor"
             ></textarea>
@@ -141,13 +141,13 @@
                   @click="selectStep(step)"
                   :class="[
                     'flex justify-between items-center px-4 py-2 bg-[#1E1F23] rounded-lg cursor-pointer transition-all',
-                    selectedStep?.step_name === step.step_name ? 'ring-2 ring-headingColor' : ''
+                    selectedStep?.step_name === step.step_name ? 'ring-2 ring-blue-400' : ''
                   ]"
                 >
                   <div class="flex items-center gap-3 flex-1">
                     <Icon
                       name="material-symbols:drag-indicator"
-                      class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing drag-handle"
+                      class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing drag-handle hover:text-blue-400 transition"
                     />
                     <div class="flex flex-col flex-1">
                       <span>{{ step.step_name }}</span>
@@ -175,13 +175,22 @@
           <!-- Main Content -->
           <div class="flex-1 bg-darkBackground text-white px-6 pt-4">
             <!-- Heading -->
-            <div v-if="selectedStep" class="mb-6">
-              <h1
-                class="text-3xl font-bold text-headingColor bg-[#1E1F23] py-3 px-4 rounded-xl"
-              >
-                {{ selectedStep.step_name }}
-              </h1>
+            <div v-if="selectedStep" class="flex mb-6 text-headingColor bg-[#1E1F23]   py-3 px-4 rounded-xl justify-between items-center">             
+                <h1
+                  class="text-3xl font-bold"
+                >
+                  {{ selectedStep.step_name }} Modules
+                </h1>             
+                <button
+                  @click="openAddModuleModal"
+                  class="flex items-center gap-2 bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] hover:opacity-90 px-4 py-2 rounded-lg text-white transition-opacity"
+                >
+                  <Icon name="material-symbols:add" />
+                  Add Module
+                </button>
             </div>
+
+            
 
             <!-- Loading State -->
             <div v-if="loading" class="text-center py-12">
@@ -193,72 +202,51 @@
               <p class="text-gray-400">Select a step to view modules</p>
             </div>
 
-            <!-- Cards container -->
-            <div v-else-if="selectedStep.modules && selectedStep.modules.length > 0" class="w-full grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <!-- Card -->
-              <div
-                v-for="module in selectedStep.modules"
-                :key="module.id"
-                class="bg-darkForground rounded-xl overflow-hidden flex flex-col"
-              >
-                <img
-                  :src="module.image || '/images/courseImage.png'"
-                  :alt="module.name"
-                  class="w-full h-48 object-cover"
-                />
-                <div class="space-y-2 p-4 flex flex-col flex-1 pb-4">
-                  <h3 class="font-bold text-lg text-white">{{ module.name }}</h3>
-                  <p class="text-sm text-gray-300 flex-1">
-                    {{ module.description || 'No description available' }}
-                  </p>
-                </div>
-
+            <!-- ✅ Modules Draggable -->
+            <draggable
+              v-else-if="selectedStep.modules && selectedStep.modules.length > 0"
+              v-model="selectedStep.modules"
+              group="modules"
+              item-key="id"
+              handle=".drag-handle"
+              @end="onModuleDragEnd"
+              class="w-full grid grid-cols-1 sm:grid-cols-3 gap-6"
+            >
+              <template #item="{ element: module }">
                 <div
-                  class="relative flex justify-between items-center bg-[#292D32] px-4 py-2 border-[#303347] border-r-2 border-b-2 border-l-2 rounded-bl-xl rounded-br-xl"
+                  class="bg-darkForground rounded-xl overflow-hidden flex flex-col w-[280px]"
                 >
-                  <p class="text-gray-400 italic capitalize">{{ module.status || 'Published' }}</p>
-                  <div class="relative module-menu">
-                    <!-- Dots button -->
-                    <div
-                      @click.stop="toggleMenu(module.id)"
-                      class="flex justify-center items-center hover:bg-darkBackground rounded-full w-8 h-8 cursor-pointer"
-                    >
-                      <Icon name="tabler:dots-vertical" class="w-5 h-5 text-gray-400" />
-                    </div>
+                  <img
+                    :src="module.image || '/images/courseImage.png'"
+                    :alt="module.name"
+                    class="w-full h-48 object-cover"
+                  />
+                  <div class="space-y-2 p-4 flex flex-col flex-1 pb-4">
+                    <h3 class="font-bold text-lg text-white">{{ module.name }}</h3>
+                    <p class="text-sm text-gray-300 flex-1">
+                      {{ module.description || 'No description available' }}
+                    </p>
+                  </div>
 
-                    <!-- Dropdown menu -->
-                    <div
-                      v-if="activeMenuId === module.id"
-                      @click.stop
-                      class="absolute right-0 mt-2 w-36 bg-[#1E1F23] border border-[#303347] rounded-lg shadow-lg z-50"
-                    >
-                      <NuxtLink
-                        :to="`/modules/${module.id}/edit`"
-                        class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-headingColor text-sm transition-all cursor-pointer"
-                      >
-                        <Icon name="material-symbols:edit-outline" />
-                        <span>Edit</span>
-                      </NuxtLink>
-
-                      <div
-                        @click="deleteModule(module)"
-                        class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-red-400 text-sm transition-all cursor-pointer"
-                      >
-                        <Icon name="material-symbols:delete-outline-rounded" />
-                        <span>Delete</span>
-                      </div>
-
-                      <div
-                        class="flex items-center gap-2 px-3 py-2 hover:bg-darkBackground text-headingColor text-sm transition-all cursor-pointer"
-                      >
-                        <Icon name="material-symbols:arrow-upload-progress" />
-                        <span>Upload</span>
-                      </div>
+                  <div
+                    class="relative flex justify-between items-center bg-[#292D32] px-4 py-2 border-[#303347] border-r-2 border-b-2 border-l-2 rounded-bl-xl rounded-br-xl"
+                  >
+                    <p class="text-gray-400 italic capitalize">{{ module.status || 'Published' }}</p>
+                    <div class="flex items-center gap-2">
+                      <Icon
+                        name="material-symbols:drag-indicator"
+                        class="w-5 h-5 text-headingColor cursor-grab hover:cursor-grabbing drag-handle hover:text-blue-400 transition"
+                      />
+                      <Icon
+                        name="material-symbols:delete-outline-rounded"
+                        class="w-5 h-5 text-gray-400 hover:text-red-500 cursor-pointer transition"
+                        @click="deleteModule(module, selectedStep.modules.indexOf(module))"
+                      />
                     </div>
                   </div>
                 </div>
-              </div>
-            </div>
+              </template>
+            </draggable>
 
             <!-- No modules in step -->
             <div v-else class="text-center py-12">
@@ -323,11 +311,107 @@
         </div>
       </div>
     </transition>
+
+    <!-- Add Module Modal -->
+    <transition name="fade">
+      <div
+        v-if="showAddModuleModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click.self="closeAddModuleModal"
+      >
+        <div class="bg-[#2A2D35] rounded-lg p-8 w-[400px]">
+          <h2 class="text-2xl font-medium text-white mb-6">Add New Model</h2>
+          <form @submit.prevent="addModuleToStep">
+            <!-- Select Module -->
+            <div class="mb-6">
+              <label class="block mb-2 text-sm text-white">Select Module</label>
+              <select
+                v-model="selectedModuleId"
+                class="w-full bg-[#1E1F23] text-white rounded-lg px-4 py-3 text-sm border border-[#3A3D45] focus:outline-none focus:border-headingColor"
+                required
+              >
+                <option value="" disabled>Select a module</option>
+                <option v-for="module in availableModules" :key="module.id" :value="module.id">
+                  {{ module.name }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Order -->
+            <div class="mb-6">
+              <label class="block mb-2 text-sm text-white">Order</label>
+              <input
+                v-model.number="moduleOrder"
+                type="number"
+                min="1"
+                placeholder="Enter order"
+                class="w-full bg-[#1E1F23] text-white rounded-lg px-4 py-3 text-sm border border-[#3A3D45] focus:outline-none focus:border-headingColor"
+                required
+              />
+            </div>
+
+            <!-- Buttons -->
+            <div class="flex gap-3 justify-center">
+              <button
+                type="button"
+                @click="closeAddModuleModal"
+                class="px-6 py-2.5 rounded-lg bg-[#D84A4A] text-white hover:opacity-90 transition font-medium"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="px-6 py-2.5 rounded-lg bg-[#4A5568] text-white hover:opacity-90 transition font-medium"
+              >
+                Add
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Delete Confirmation Modal -->
+    <transition name="fade">
+      <div
+        v-if="showDeleteModal"
+        class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+        @click.self="closeDeleteModal"
+      >
+        <div class="bg-[#2A2D35] rounded-lg p-8 w-[420px]">
+          <h2 class="text-2xl font-medium text-white mb-4">Confirm Deletion</h2>
+          <p class="text-gray-300 mb-6">
+            Are you sure you want to delete 
+            <span class="font-semibold text-white">"{{ deleteModalData.name }}"</span>
+            {{ deleteModalData.type === 'step' ? 'step' : 'module' }}?
+            <span v-if="deleteModalData.type === 'step' && deleteModalData.item?.modules?.length > 0" class="block mt-2 text-red-400">
+              This will also remove {{ deleteModalData.item.modules.length }} module(s) from this step.
+            </span>
+          </p>
+          <div class="flex gap-3 justify-center">
+            <button
+              type="button"
+              @click="closeDeleteModal"
+              class="px-6 py-2.5 rounded-lg bg-[#4A5568] text-white hover:opacity-90 transition font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              @click="confirmDelete"
+              class="px-6 py-2.5 rounded-lg bg-[#D84A4A] text-white hover:opacity-90 transition font-medium"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, onBeforeUnmount } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import draggable from "vuedraggable";
 
@@ -335,7 +419,7 @@ const route = useRoute();
 const router = useRouter();
 const config = useRuntimeConfig();
 
-const activeTab = ref(route.query.tab || "settings");
+const activeTab = ref("settings");
 const isEditMode = route.params.slug !== "create";
 
 const form = ref({
@@ -346,7 +430,6 @@ const form = ref({
   duration_days: "",
 });
 
-// ✅ Backend Integration for Modules
 const steps = ref([]);
 const selectedStep = ref(null);
 const loading = ref(false);
@@ -354,22 +437,33 @@ const activeMenuId = ref(null);
 const showNewStepModal = ref(false);
 const newStepName = ref("");
 
-// ✅ Toast
+// Add Module Modal State
+const showAddModuleModal = ref(false);
+const availableModules = ref([]);
+const selectedModuleId = ref("");
+const moduleOrder = ref(1);
+
+// Delete Confirmation Modal State
+const showDeleteModal = ref(false);
+const deleteModalData = ref({
+  type: '', // 'step' or 'module'
+  name: '',
+  item: null,
+  index: null
+});
+
 const toast = ref({ visible: false, message: "", type: "success" });
 const showToast = (message, type = "success") => {
   toast.value = { visible: true, message, type };
   setTimeout(() => (toast.value.visible = false), 2500);
 };
 
-// ✅ Fetch roadmap data
 const fetchRoadmapData = async () => {
   if (!isEditMode) return;
-  
   loading.value = true;
   try {
     const res = await fetch(`${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`);
     const data = await res.json();
-    
     form.value = {
       name: data.name,
       slug: data.slug,
@@ -377,249 +471,296 @@ const fetchRoadmapData = async () => {
       type: data.type,
       duration_days: data.duration_days,
     };
-    
     steps.value = data.steps || [];
-    
-    // Select first step by default
-    if (steps.value.length > 0) {
-      selectedStep.value = steps.value[0];
-    }
-  } catch (err) {
-    console.error(err);
+    if (steps.value.length > 0) selectedStep.value = steps.value[0];
+  } catch {
     showToast("Failed to load learning path", "error");
   } finally {
     loading.value = false;
   }
 };
 
-// ✅ Format steps for API submission
-const formatStepsForAPI = () => {
-  return steps.value.map((step, stepIndex) => ({
-    step_name: step.step_name,
-    step_order: stepIndex + 1,
-    modules: (step.modules || []).map((module, moduleIndex) => ({
-      id: module.id,
-      module_order: moduleIndex + 1
-    }))
-  }));
+// Fetch available modules
+const fetchAvailableModules = async () => {
+  try {
+    const res = await fetch(`${config.public.API_BASE_URL}api/lms/modules/`);
+    const data = await res.json();
+    availableModules.value = data.results || data || [];
+  } catch {
+    showToast("Failed to load modules", "error");
+  }
 };
 
-// ✅ Mounted - fetch data on load
+const formatStepsForAPI = () =>
+  steps.value.map((step, i) => ({
+    step_name: step.step_name,
+    step_order: i + 1,
+    modules: (step.modules || []).map((m, j) => ({
+      id: m.id,
+      module_order: j + 1,
+    })),
+  }));
+
 onMounted(() => {
   fetchRoadmapData();
+  fetchAvailableModules();
 });
 
-// ✅ Select a step
-const selectStep = (step) => {
-  selectedStep.value = step;
-  activeMenuId.value = null; // Close any open menu
-};
+const selectStep = (s) => (selectedStep.value = s);
 
-// ✅ Toggle dropdown menu
-const toggleMenu = (moduleId) => {
-  activeMenuId.value = activeMenuId.value === moduleId ? null : moduleId;
-};
-
-// ✅ Close menu when clicking outside
-document.addEventListener('click', (e) => {
-  if (!e.target.closest('.relative')) {
-    activeMenuId.value = null;
-  }
-});
-
-// ✅ Save or update roadmap settings
 const handleSubmit = async () => {
   const url = isEditMode
     ? `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`
     : `${config.public.API_BASE_URL}api/lms/roadmaps/`;
-
   const method = isEditMode ? "PUT" : "POST";
-
   try {
-    const payload = {
-      ...form.value,
-      steps: formatStepsForAPI()
-    };
-
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
     });
-
-    if (!res.ok) throw new Error("Save failed");
+    if (!res.ok) throw new Error();
     showToast(isEditMode ? "Updated successfully!" : "Saved successfully!");
-    
-    // Refresh data after update
-    if (isEditMode) {
-      fetchRoadmapData();
-    }
+    if (isEditMode) fetchRoadmapData();
   } catch {
     showToast("Network error while saving.", "error");
   }
 };
 
-// ✅ Delete a step
-const deleteStep = async (step, index) => {
-  if (!confirm(`Are you sure you want to delete "${step.step_name}"?`)) return;
+const deleteStep = async (step, i) => {
+  showDeleteModal.value = true;
+  deleteModalData.value = {
+    type: 'step',
+    name: step.step_name,
+    item: step,
+    index: i
+  };
+};
 
-  try {
-    // Create updated steps array without the deleted step
-    const updatedSteps = steps.value.filter((_, i) => i !== index);
-    
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form.value,
-          steps: updatedSteps.map((step, stepIndex) => ({
-            step_name: step.step_name,
-            step_order: stepIndex + 1,
-            modules: (step.modules || []).map((module, moduleIndex) => ({
-              id: module.id,
-              module_order: moduleIndex + 1
-            }))
-          }))
-        }),
-      }
-    );
+const deleteModule = (module, moduleIndex) => {
+  showDeleteModal.value = true;
+  deleteModalData.value = {
+    type: 'module',
+    name: module.name,
+    item: module,
+    index: moduleIndex
+  };
+};
 
-    if (!res.ok) throw new Error("Delete failed");
-    
-    showToast("Step deleted successfully!");
-    fetchRoadmapData();
-    
-    // Clear selection if deleted step was selected
-    if (selectedStep.value?.step_name === step.step_name) {
-      selectedStep.value = null;
-    }
-  } catch (err) {
-    console.error(err);
-    showToast("Failed to delete step", "error");
+const confirmDelete = async () => {
+  if (deleteModalData.value.type === 'step') {
+    await executeStepDelete();
+  } else if (deleteModalData.value.type === 'module') {
+    await executeModuleDelete();
   }
 };
 
-// ✅ Delete a module
-const deleteModule = async (module) => {
-  if (!confirm(`Are you sure you want to delete "${module.name}"?`)) return;
-
+const executeStepDelete = async () => {
   try {
-    // Update the selected step's modules
-    const updatedModules = selectedStep.value.modules.filter(m => m.id !== module.id);
-    const updatedSteps = steps.value.map((step, stepIndex) => {
-      if (step.step_name === selectedStep.value.step_name) {
-        return {
-          step_name: step.step_name,
-          step_order: stepIndex + 1,
-          modules: updatedModules.map((mod, modIndex) => ({
-            id: mod.id,
-            module_order: modIndex + 1
-          }))
-        };
-      }
-      return {
-        step_name: step.step_name,
-        step_order: stepIndex + 1,
-        modules: (step.modules || []).map((mod, modIndex) => ({
-          id: mod.id,
-          module_order: modIndex + 1
-        }))
-      };
-    });
+    const step = deleteModalData.value.item;
+    const i = deleteModalData.value.index;
     
+    const updated = steps.value.filter((_, idx) => idx !== i);
     const res = await fetch(
       `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form.value,
-          steps: updatedSteps,
+        body: JSON.stringify({ 
+          ...form.value, 
+          steps: updated.map((s, idx) => ({
+            step_name: s.step_name,
+            step_order: idx + 1,
+            modules: (s.modules || []).map((m, j) => ({
+              id: m.id,
+              module_order: j + 1,
+            })),
+          }))
         }),
       }
     );
+    if (!res.ok) throw new Error();
+    showToast("Step deleted successfully!");
+    await fetchRoadmapData();
+    if (selectedStep.value?.step_name === step.step_name) {
+      selectedStep.value = steps.value.length > 0 ? steps.value[0] : null;
+    }
+    closeDeleteModal();
+  } catch {
+    showToast("Failed to delete step", "error");
+    closeDeleteModal();
+  }
+};
 
-    if (!res.ok) throw new Error("Delete failed");
+const executeModuleDelete = async () => {
+  try {
+    const moduleIndex = deleteModalData.value.index;
+    
+    // Remove module from selected step
+    const updatedModules = selectedStep.value.modules.filter((_, idx) => idx !== moduleIndex);
+    
+    // Update the step in steps array
+    const stepIndex = steps.value.findIndex(s => s.step_name === selectedStep.value.step_name);
+    steps.value[stepIndex].modules = updatedModules;
+    
+    // Save to API
+    const res = await fetch(
+      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
+      }
+    );
+    
+    if (!res.ok) throw new Error();
     
     showToast("Module deleted successfully!");
-    fetchRoadmapData();
-    activeMenuId.value = null;
-  } catch (err) {
-    console.error(err);
+    await fetchRoadmapData();
+    closeDeleteModal();
+  } catch {
     showToast("Failed to delete module", "error");
+    closeDeleteModal();
   }
 };
 
-// ✅ Open new step modal
-const openNewStepModal = () => {
-  showNewStepModal.value = true;
-  newStepName.value = "";
+const closeDeleteModal = () => {
+  showDeleteModal.value = false;
+  deleteModalData.value = {
+    type: '',
+    name: '',
+    item: null,
+    index: null
+  };
 };
 
-// ✅ Close new step modal
+const openNewStepModal = () => (showNewStepModal.value = true);
 const closeNewStepModal = () => {
   showNewStepModal.value = false;
   newStepName.value = "";
 };
 
-// ✅ Create new step
 const createNewStep = async () => {
-  if (!newStepName.value.trim()) return;
-
+  if (!newStepName.value.trim()) {
+    showToast("Please enter a step name", "error");
+    return;
+  }
+  
   try {
+    // Create new step object
     const newStep = {
-      step_name: newStepName.value,
+      step_name: newStepName.value.trim(),
       step_order: steps.value.length + 1,
-      modules: []
+      modules: [],
     };
-
-    const updatedSteps = [...steps.value, newStep];
     
+    // Add to local steps array
+    steps.value.push(newStep);
+    
+    // Save to API
     const res = await fetch(
       `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form.value,
-          steps: updatedSteps.map((step, stepIndex) => ({
-            step_name: step.step_name,
-            step_order: stepIndex + 1,
-            modules: (step.modules || []).map((module, moduleIndex) => ({
-              id: module.id,
-              module_order: moduleIndex + 1
-            }))
-          })),
-        }),
+        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
       }
     );
-
-    if (!res.ok) throw new Error("Create failed");
+    
+    if (!res.ok) {
+      // Remove from local array if API call fails
+      steps.value.pop();
+      throw new Error("API request failed");
+    }
     
     showToast("Step created successfully!");
-    fetchRoadmapData();
+    
+    // Select the newly created step
+    selectedStep.value = newStep;
+    
+    // Refresh data from server
+    await fetchRoadmapData();
+    
     closeNewStepModal();
-  } catch (err) {
-    console.error(err);
+  } catch (error) {
     showToast("Failed to create step", "error");
+    console.error("Error creating step:", error);
   }
 };
 
-// ✅ Watch for tab changes to refresh data and update URL
-watch(activeTab, (newTab) => {
-  // Update URL query parameter
-  router.push({ 
-    query: { ...route.query, tab: newTab } 
-  });
-  
-  if (newTab === 'modules' && isEditMode) {
-    fetchRoadmapData();
+// Add Module Modal Functions
+const openAddModuleModal = () => {
+  if (!selectedStep.value) {
+    showToast("Please select a step first", "error");
+    return;
   }
+  moduleOrder.value = (selectedStep.value.modules?.length || 0) + 1;
+  showAddModuleModal.value = true;
+};
+
+const closeAddModuleModal = () => {
+  showAddModuleModal.value = false;
+  selectedModuleId.value = "";
+  moduleOrder.value = 1;
+};
+
+const addModuleToStep = async () => {
+  if (!selectedModuleId.value || !selectedStep.value) return;
+  
+  try {
+    // Find the selected module details
+    const moduleToAdd = availableModules.value.find(m => m.id === selectedModuleId.value);
+    if (!moduleToAdd) {
+      showToast("Module not found", "error");
+      return;
+    }
+
+    // Check if module already exists in the step
+    const existingModule = selectedStep.value.modules?.find(m => m.id === selectedModuleId.value);
+    if (existingModule) {
+      showToast("Module already exists in this step", "error");
+      return;
+    }
+
+    // Add module to the selected step
+    const updatedModules = [...(selectedStep.value.modules || []), {
+      id: moduleToAdd.id,
+      name: moduleToAdd.name,
+      description: moduleToAdd.description,
+      image: moduleToAdd.image,
+      status: moduleToAdd.status,
+      module_order: moduleOrder.value
+    }];
+
+    // Update the step with new modules
+    const stepIndex = steps.value.findIndex(s => s.step_name === selectedStep.value.step_name);
+    steps.value[stepIndex].modules = updatedModules;
+
+    // Save to API
+    const res = await fetch(
+      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
+      }
+    );
+    
+    if (!res.ok) throw new Error();
+    
+    showToast("Module added successfully!");
+    fetchRoadmapData();
+    closeAddModuleModal();
+  } catch {
+    showToast("Failed to add module", "error");
+  }
+};
+
+watch(activeTab, (t) => {
+  router.push({ query: { ...route.query, tab: t } });
+  if (t === "modules" && isEditMode) fetchRoadmapData();
 });
 
-// ✅ Handle step drag end - save new order
 const onStepDragEnd = async () => {
   try {
     const res = await fetch(
@@ -627,19 +768,33 @@ const onStepDragEnd = async () => {
       {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...form.value,
-          steps: formatStepsForAPI(),
-        }),
+        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
       }
     );
-
-    if (!res.ok) throw new Error("Reorder failed");
+    if (!res.ok) throw new Error();
     showToast("Step order updated successfully!");
-  } catch (err) {
-    console.error(err);
+  } catch {
     showToast("Failed to update step order", "error");
-    fetchRoadmapData(); // Revert on error
+    fetchRoadmapData();
+  }
+};
+
+const onModuleDragEnd = async () => {
+  try {
+    const res = await fetch(
+      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
+      }
+    );
+    if (!res.ok) throw new Error();
+    showToast("Module order updated successfully!");
+    fetchRoadmapData();
+  } catch {
+    showToast("Failed to update module order", "error");
+    fetchRoadmapData();
   }
 };
 </script>

@@ -54,7 +54,7 @@ const performances = [
   },
   {
     position: 3,
-    name: "Rasikh Iqram",
+    name: "Rasikh Ikram",
     color: "#0078D4",
     progress: "50%",
     score: "2K",

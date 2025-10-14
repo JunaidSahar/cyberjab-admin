@@ -4,7 +4,7 @@
       <h1 class="text-headingColor text-3xl">Modules</h1>
       <NuxtLink 
         to="/modules/create" 
-        class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] px-4 py-2 rounded-lg text-white hover:opacity-90 transition-opacity"
+        class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] hover:opacity-90 px-4 py-2 rounded-lg text-white transition-opacity"
       >
         Create Module
       </NuxtLink>
@@ -68,13 +68,13 @@
     <ClientOnly>
         <!-- Loading State -->
         <div v-if="loading" class="gap-x-5 gap-y-8 grid grid-cols-4 pt-8">
-            <div v-for="i in 8" :key="i" class="animate-pulse bg-gray-200 rounded-xl h-80"></div>
+            <div v-for="i in 8" :key="i" class="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
         </div>
 
         <!-- Error State -->
-        <div v-else-if="error" class="text-red-500 p-8 text-center">
+        <div v-else-if="error" class="p-8 text-red-500 text-center">
             <p>Error loading modules: {{ error }}</p>
-            <button @click="fetchModules" class="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            <button @click="fetchModules" class="bg-blue-500 hover:bg-blue-600 mt-4 px-4 py-2 rounded text-white">
                 Retry
             </button>
         </div>
@@ -92,10 +92,10 @@
         </div>
 
         <!-- Empty State -->
-        <div v-else class="text-center py-16">
-            <Icon name="heroicons:document-text" class="mx-auto h-16 w-16 text-gray-400 mb-4" />
-            <h3 class="text-lg font-medium text-headingColor mb-2">No modules found</h3>
-            <p class="text-gray-400 mb-6">
+        <div v-else class="py-16 text-center">
+            <Icon name="heroicons:document-text" class="mx-auto mb-4 w-16 h-16 text-gray-400" />
+            <h3 class="mb-2 font-medium text-headingColor text-lg">No modules found</h3>
+            <p class="mb-6 text-gray-400">
               {{ searchQuery ? 'No modules match your search criteria.' : 'Get started by creating your first module.' }}
             </p>
             <button
@@ -107,7 +107,7 @@
         </div>
         <template #fallback>
             <div class="gap-x-5 gap-y-8 grid grid-cols-4 pt-8">
-                <div v-for="i in 8" :key="i" class="animate-pulse bg-gray-200 rounded-xl h-80"></div>
+                <div v-for="i in 8" :key="i" class="bg-gray-200 rounded-xl h-80 animate-pulse"></div>
             </div>
         </template>
     </ClientOnly>
@@ -117,7 +117,7 @@
         <button 
           @click="changePage(currentPage - 1)"
           :disabled="currentPage <= 1"
-          class="px-4 py-2 bg-darkForeground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          class="bg-darkForeground disabled:opacity-50 px-4 py-2 rounded text-headingColor disabled:cursor-not-allowed"
         >
           Previous
         </button>
@@ -127,7 +127,7 @@
         <button 
           @click="changePage(currentPage + 1)"
           :disabled="currentPage >= totalPages"
-          class="px-4 py-2 bg-darkForeground text-headingColor rounded disabled:opacity-50 disabled:cursor-not-allowed"
+          class="bg-darkForeground disabled:opacity-50 px-4 py-2 rounded text-headingColor disabled:cursor-not-allowed"
         >
           Next
         </button>

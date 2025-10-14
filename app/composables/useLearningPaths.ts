@@ -21,8 +21,7 @@ export const useLearningPath = () => {
 
       // Add optional filters
       if (filters.search) queryParams.search = filters.search;
-      if (filters.is_active !== undefined)
-        queryParams.is_active = filters.is_active;
+      if (filters.published) queryParams.is_active = filters.published;
       if (filters.ordering) queryParams.ordering = filters.ordering;
 
       const res = await $fetch(

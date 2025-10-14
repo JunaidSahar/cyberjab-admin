@@ -1,5 +1,5 @@
 <template>
-  <div class="relative inline-block text-left">
+  <div class="inline-block relative text-left">
     <button
       @click="toggleDropdown"
       type="button"
@@ -10,7 +10,7 @@
 
     <div
       v-if="isOpen"
-      class="absolute right-0 z-50 mt-2 w-48 origin-top-right rounded-md bg-darkForeground shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+      class="right-0 z-50 absolute bg-[#292D32] ring-opacity-5 shadow-lg mt-2 rounded-md focus:outline-none ring-1 ring-black w-48 origin-top-right"
       role="menu"
       aria-orientation="vertical"
       aria-labelledby="menu-button"

@@ -29,39 +29,41 @@
         </li>
       </ul>
     </div>
-    
+
     <!-- User Info and Logout -->
-    <div class="absolute bottom-0 left-0 right-0 p-6 border-t border-border">
+    <div class="right-0 bottom-0 left-0 absolute p-6 border-t border-border">
       <ClientOnly>
         <div v-if="userStore.isAuthenticated" class="space-y-3">
-          <div class="text-sm text-gray-400">
+          <div class="text-gray-400 text-sm">
             <p>Logged in as:</p>
-            <p class="text-white font-medium">{{ userStore.user?.email || 'Admin User' }}</p>
+            <p class="font-medium text-white">
+              {{ userStore.user?.email || "Admin User" }}
+            </p>
           </div>
           <button
             @click="handleLogout"
             :disabled="loggingOut"
-            class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-700 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            class="flex justify-center items-center bg-transparent hover:bg-gray-700 disabled:opacity-50 px-3 py-2 border border-gray-600 rounded-md w-full font-medium text-gray-300 hover:text-white text-sm transition-colors disabled:cursor-not-allowed"
           >
-            <Icon name="material-symbols:logout" class="w-4 h-4 mr-2" />
-            {{ loggingOut ? 'Logging out...' : 'Logout' }}
+            <Icon name="material-symbols:logout" class="mr-2 w-4 h-4" />
+            {{ loggingOut ? "Logging out..." : "Logout" }}
           </button>
         </div>
         <div v-else class="space-y-3">
-          <div class="text-sm text-gray-400">
+          <div class="text-gray-400 text-sm">
             <p>Not logged in</p>
           </div>
           <button
             @click="$router.push('/login')"
-            class="w-full flex items-center justify-center px-3 py-2 text-sm font-medium text-gray-300 bg-transparent border border-gray-600 rounded-md hover:bg-gray-700 hover:text-white transition-colors"
+            class="flex justify-center items-center bg-transparent hover:bg-gray-700 px-3 py-2 border border-gray-600 rounded-md w-full font-medium text-gray-300 hover:text-white text-sm transition-colors"
           >
-            <Icon name="material-symbols:login" class="w-4 h-4 mr-2" />
+            <Icon name="material-symbols:login" class="mr-2 w-4 h-4" />
             Login
           </button>
         </div>
         <template #fallback>
           <div class="space-y-3">
-            <div class="text-sm text-gray-400">
+            <div class="text-gray-400 text-sm">
               <p>Loading...</p>
             </div>
           </div>
@@ -84,21 +86,21 @@ const userStore = useUserStore();
 
 const handleLogout = async () => {
   loggingOut.value = true;
-  
+
   try {
     const { error } = await logout();
-    
+
     if (error) {
-       console.error("Failed to logout properly:", error);
-     } else {
-       console.log("You have been logged out successfully");
-     }
-    
+      console.error("Failed to logout properly:", error);
+    } else {
+      console.log("You have been logged out successfully");
+    }
+
     // Redirect to login page
-    await router.push('/login');
+    await router.push("/login");
   } catch (err) {
-     console.error("An unexpected error occurred during logout:", err);
-   } finally {
+    console.error("An unexpected error occurred during logout:", err);
+  } finally {
     loggingOut.value = false;
   }
 };
@@ -153,6 +155,12 @@ const moduleList = computed(() => {
       icon: "mdi:tag-outline",
       link: "/packages",
       active: route.path.includes("/packages"),
+    },
+    {
+      name: "Import Data",
+      icon: "mdi:upload-outline",
+      link: "/import",
+      active: route.path.includes("/import"),
     },
   ];
 });

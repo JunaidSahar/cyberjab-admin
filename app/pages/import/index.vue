@@ -419,7 +419,7 @@
 
 <script setup>
 import { ref } from "vue";
-import JSZip from "jszip";
+
 
 const manifest = ref(null);
 const instructors = ref([]);

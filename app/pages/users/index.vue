@@ -3,11 +3,14 @@ import { ref, onMounted } from "vue";
 import DataTable from "~/components/global/data-table.vue";
 import { useRouter } from "vue-router";
 
+
 const router = useRouter();
 
 const config = useRuntimeConfig();
 const BASE_URL = config.public.API_BASE_URL;
-const TOKEN = config.public.API_TOKEN;
+const { getAccessToken } = useAuth();
+
+const TOKEN = getAccessToken()
 
 const columns = [
   { key: "first_name", title: "First Name" },
@@ -114,10 +117,8 @@ function handleAction({ action, row }: any) {
     <!-- Header -->
     <div class="flex justify-between items-center w-full">
       <h1 class="text-headingColor text-3xl">Users</h1>
-      <button
-        @click="() => router.push('/users/create-user')"
-        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
-      >
+      <button @click="() => router.push('/users/create-user')"
+        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all">
         <Icon name="material-symbols:add" />
         Create
       </button>
@@ -125,13 +126,7 @@ function handleAction({ action, row }: any) {
 
     <!-- Table -->
     <div class="pt-5">
-      <DataTable
-        v-if="!loading"
-        :columns="columns"
-        :data="data"
-        @action="handleAction"
-        @delete="handleDelete"
-      />
+      <DataTable v-if="!loading" :columns="columns" :data="data" @action="handleAction" @delete="handleDelete" />
       <div v-else class="text-center py-10">Loading users...</div>
     </div>
   </div>

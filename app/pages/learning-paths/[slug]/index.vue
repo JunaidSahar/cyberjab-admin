@@ -1,6 +1,6 @@
 <template>
   <div class="min-h-screen w-full text-headingColor bg-darkBackground relative">
-    <div class="max-w-7xl">
+    <div>
       <!-- Back Link -->
       <div class="flex items-center gap-2 mb-2">
         <NuxtLink
@@ -20,7 +20,7 @@
       <!-- Tabs (only when editing) -->
       <div v-if="isEditMode" class="flex border-b border-[#2E2F34] space-x-12 mb-6">
         <button
-          @click="activeTab = 'settings'"
+          @click="handleTabChange('settings')"
           :class="[ 
             'py-2 text-lg font-medium',
             activeTab === 'settings'
@@ -32,7 +32,7 @@
         </button>
 
         <button
-          @click="activeTab = 'modules'"
+          @click="handleTabChange('modules')"
           :class="[ 
             'py-2 text-lg font-medium',
             activeTab === 'modules'
@@ -180,7 +180,7 @@
                 {{ selectedStep.step_name }} Modules
               </h1>             
               <div class="flex items-center gap-3">
-                <!-- Delete Selected Button (shows when modules are selected) -->
+                <!-- Delete Selected Button -->
                 <button
                   v-if="selectedModules.length > 0"
                   @click="deleteSelectedModules"
@@ -225,7 +225,7 @@
                   class="bg-darkForground rounded-xl overflow-hidden flex flex-col w-[280px] relative group cursor-pointer"
                   @click="toggleModuleSelection(module.id)"
                 >
-                  <!-- Checkbox (appears on hover or when selected) -->
+                  <!-- Checkbox -->
                   <div :class="[
                     'absolute top-3 left-3 z-10 transition-opacity duration-200',
                     isModuleSelected(module.id) ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
@@ -445,443 +445,53 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from "vue";
-import { useRoute, useRouter } from "vue-router";
 import draggable from "vuedraggable";
 
-const route = useRoute();
-const router = useRouter();
-const config = useRuntimeConfig();
+// Use the composable
+const {
+  activeTab,
+  isEditMode,
+  form,
+  steps,
+  selectedStep,
+  loading,
+  showNewStepModal,
+  newStepName,
+  showAddModuleModal,
+  availableModules,
+  selectedModuleId,
+  moduleOrder,
+  showDeleteModal,
+  deleteModalData,
+  selectedModules,
+  toast,
+  fetchRoadmapData,
+  fetchAvailableModules,
+  handleSubmit,
+  selectStep,
+  openNewStepModal,
+  closeNewStepModal,
+  createNewStep,
+  deleteStep,
+  onStepDragEnd,
+  isModuleSelected,
+  toggleModuleSelection,
+  openAddModuleModal,
+  closeAddModuleModal,
+  addModuleToStep,
+  deleteModule,
+  deleteSelectedModules,
+  onModuleDragEnd,
+  confirmDelete,
+  closeDeleteModal,
+  handleTabChange,
+} = useLearningPath();
 
-const activeTab = ref("settings");
-const isEditMode = route.params.slug !== "create";
-
-const form = ref({
-  name: "",
-  slug: "",
-  description: "",
-  type: "",
-  duration_days: "",
-});
-
-const steps = ref([]);
-const selectedStep = ref(null);
-const loading = ref(false);
-const showNewStepModal = ref(false);
-const newStepName = ref("");
-
-// Add Module Modal State
-const showAddModuleModal = ref(false);
-const availableModules = ref([]);
-const selectedModuleId = ref("");
-const moduleOrder = ref(1);
-
-// Delete Confirmation Modal State
-const showDeleteModal = ref(false);
-const deleteModalData = ref({
-  type: '',
-  name: '',
-  item: null,
-  index: null
-});
-
-// Selected modules for bulk delete
-const selectedModules = ref([]);
-
-const toast = ref({ visible: false, message: "", type: "success" });
-const showToast = (message, type = "success") => {
-  toast.value = { visible: true, message, type };
-  setTimeout(() => (toast.value.visible = false), 2500);
-};
-
-const fetchRoadmapData = async () => {
-  if (!isEditMode) return;
-  loading.value = true;
-  try {
-    const res = await fetch(`${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`);
-    const data = await res.json();
-    form.value = {
-      name: data.name,
-      slug: data.slug,
-      description: data.description,
-      type: data.type,
-      duration_days: data.duration_days,
-    };
-    steps.value = data.steps || [];
-    if (steps.value.length > 0) selectedStep.value = steps.value[0];
-  } catch {
-    showToast("Failed to load learning path", "error");
-  } finally {
-    loading.value = false;
-  }
-};
-
-const fetchAvailableModules = async () => {
-  try {
-    const res = await fetch(`${config.public.API_BASE_URL}api/lms/modules/`);
-    const data = await res.json();
-    availableModules.value = data.results || data || [];
-  } catch {
-    showToast("Failed to load modules", "error");
-  }
-};
-
-const formatStepsForAPI = () =>
-  steps.value.map((step, i) => ({
-    step_name: step.step_name,
-    step_order: i + 1,
-    modules: (step.modules || []).map((m, j) => ({
-      id: m.id,
-      module_order: j + 1,
-    })),
-  }));
-
+// Initialize data on mount
 onMounted(() => {
   fetchRoadmapData();
   fetchAvailableModules();
 });
-
-const selectStep = (s) => {
-  selectedStep.value = s;
-  selectedModules.value = []; // Clear selections when switching steps
-};
-
-// Module selection functions
-const isModuleSelected = (moduleId) => {
-  return selectedModules.value.includes(moduleId);
-};
-
-const toggleModuleSelection = (moduleId) => {
-  const index = selectedModules.value.indexOf(moduleId);
-  if (index > -1) {
-    selectedModules.value.splice(index, 1);
-  } else {
-    selectedModules.value.push(moduleId);
-  }
-};
-
-const deleteSelectedModules = () => {
-  if (selectedModules.value.length === 0) return;
-  
-  const moduleNames = selectedStep.value.modules
-    .filter(m => selectedModules.value.includes(m.id))
-    .map(m => m.name)
-    .join(', ');
-  
-  showDeleteModal.value = true;
-  deleteModalData.value = {
-    type: 'modules',
-    name: moduleNames,
-    item: selectedModules.value,
-    index: null
-  };
-};
-
-const handleSubmit = async () => {
-  const url = isEditMode
-    ? `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`
-    : `${config.public.API_BASE_URL}api/lms/roadmaps/`;
-  const method = isEditMode ? "PUT" : "POST";
-  try {
-    const res = await fetch(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-    });
-    if (!res.ok) throw new Error();
-    showToast(isEditMode ? "Updated successfully!" : "Saved successfully!");
-    if (isEditMode) fetchRoadmapData();
-  } catch {
-    showToast("Network error while saving.", "error");
-  }
-};
-
-const deleteStep = (step, i) => {
-  showDeleteModal.value = true;
-  deleteModalData.value = {
-    type: 'step',
-    name: step.step_name,
-    item: step,
-    index: i
-  };
-};
-
-const deleteModule = (module, moduleIndex) => {
-  showDeleteModal.value = true;
-  deleteModalData.value = {
-    type: 'module',
-    name: module.name,
-    item: module,
-    index: moduleIndex
-  };
-};
-
-const confirmDelete = async () => {
-  if (deleteModalData.value.type === 'step') {
-    await executeStepDelete();
-  } else if (deleteModalData.value.type === 'module') {
-    await executeModuleDelete();
-  } else if (deleteModalData.value.type === 'modules') {
-    await executeBulkModuleDelete();
-  }
-};
-
-const executeStepDelete = async () => {
-  try {
-    const step = deleteModalData.value.item;
-    const i = deleteModalData.value.index;
-    
-    const updated = steps.value.filter((_, idx) => idx !== i);
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          ...form.value, 
-          steps: updated.map((s, idx) => ({
-            step_name: s.step_name,
-            step_order: idx + 1,
-            modules: (s.modules || []).map((m, j) => ({
-              id: m.id,
-              module_order: j + 1,
-            })),
-          }))
-        }),
-      }
-    );
-    if (!res.ok) throw new Error();
-    showToast("Step deleted successfully!");
-    await fetchRoadmapData();
-    if (selectedStep.value?.step_name === step.step_name) {
-      selectedStep.value = steps.value.length > 0 ? steps.value[0] : null;
-    }
-    closeDeleteModal();
-  } catch {
-    showToast("Failed to delete step", "error");
-    closeDeleteModal();
-  }
-};
-
-const executeModuleDelete = async () => {
-  try {
-    const moduleIndex = deleteModalData.value.index;
-    
-    const updatedModules = selectedStep.value.modules.filter((_, idx) => idx !== moduleIndex);
-    
-    const stepIndex = steps.value.findIndex(s => s.step_name === selectedStep.value.step_name);
-    steps.value[stepIndex].modules = updatedModules;
-    
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    
-    if (!res.ok) throw new Error();
-    
-    showToast("Module deleted successfully!");
-    await fetchRoadmapData();
-    closeDeleteModal();
-  } catch {
-    showToast("Failed to delete module", "error");
-    closeDeleteModal();
-  }
-};
-
-const executeBulkModuleDelete = async () => {
-  try {
-    const moduleIdsToDelete = deleteModalData.value.item;
-    
-    const updatedModules = selectedStep.value.modules.filter(
-      m => !moduleIdsToDelete.includes(m.id)
-    );
-    
-    const stepIndex = steps.value.findIndex(s => s.step_name === selectedStep.value.step_name);
-    steps.value[stepIndex].modules = updatedModules;
-    
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    
-    if (!res.ok) throw new Error();
-    
-    showToast(`${moduleIdsToDelete.length} module(s) deleted successfully!`);
-    selectedModules.value = [];
-    await fetchRoadmapData();
-    closeDeleteModal();
-  } catch {
-    showToast("Failed to delete modules", "error");
-    closeDeleteModal();
-  }
-};
-
-const closeDeleteModal = () => {
-  showDeleteModal.value = false;
-  deleteModalData.value = {
-    type: '',
-    name: '',
-    item: null,
-    index: null
-  };
-};
-
-const openNewStepModal = () => (showNewStepModal.value = true);
-const closeNewStepModal = () => {
-  showNewStepModal.value = false;
-  newStepName.value = "";
-};
-
-const createNewStep = async () => {
-  if (!newStepName.value.trim()) {
-    showToast("Please enter a step name", "error");
-    return;
-  }
-  
-  try {
-    const newStep = {
-      step_name: newStepName.value.trim(),
-      step_order: steps.value.length + 1,
-      modules: [],
-    };
-    
-    steps.value.push(newStep);
-    
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    
-    if (!res.ok) {
-      steps.value.pop();
-      throw new Error("API request failed");
-    }
-    
-    showToast("Step created successfully!");
-    selectedStep.value = newStep;
-    await fetchRoadmapData();
-    closeNewStepModal();
-  } catch (error) {
-    showToast("Failed to create step", "error");
-    console.error("Error creating step:", error);
-  }
-};
-
-const openAddModuleModal = () => {
-  if (!selectedStep.value) {
-    showToast("Please select a step first", "error");
-    return;
-  }
-  moduleOrder.value = (selectedStep.value.modules?.length || 0) + 1;
-  showAddModuleModal.value = true;
-};
-
-const closeAddModuleModal = () => {
-  showAddModuleModal.value = false;
-  selectedModuleId.value = "";
-  moduleOrder.value = 1;
-};
-
-const addModuleToStep = async () => {
-  if (!selectedModuleId.value || !selectedStep.value) return;
-  
-  try {
-    const moduleToAdd = availableModules.value.find(m => m.id === selectedModuleId.value);
-    if (!moduleToAdd) {
-      showToast("Module not found", "error");
-      return;
-    }
-
-    const existingModule = selectedStep.value.modules?.find(m => m.id === selectedModuleId.value);
-    if (existingModule) {
-      showToast("Module already exists in this step", "error");
-      return;
-    }
-
-    const updatedModules = [...(selectedStep.value.modules || []), {
-      id: moduleToAdd.id,
-      name: moduleToAdd.name,
-      description: moduleToAdd.description,
-      image: moduleToAdd.image,
-      status: moduleToAdd.status,
-      module_order: moduleOrder.value
-    }];
-
-    const stepIndex = steps.value.findIndex(s => s.step_name === selectedStep.value.step_name);
-    steps.value[stepIndex].modules = updatedModules;
-
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    
-    if (!res.ok) throw new Error();
-    
-    showToast("Module added successfully!");
-    fetchRoadmapData();
-    closeAddModuleModal();
-  } catch {
-    showToast("Failed to add module", "error");
-  }
-};
-
-watch(activeTab, (t) => {
-  router.push({ query: { ...route.query, tab: t } });
-  if (t === "modules" && isEditMode) fetchRoadmapData();
-});
-
-const onStepDragEnd = async () => {
-  try {
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    if (!res.ok) throw new Error();
-    showToast("Step order updated successfully!");
-  } catch {
-    showToast("Failed to update step order", "error");
-    fetchRoadmapData();
-  }
-};
-
-const onModuleDragEnd = async () => {
-  try {
-    const res = await fetch(
-      `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
-      {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form.value, steps: formatStepsForAPI() }),
-      }
-    );
-    if (!res.ok) throw new Error();
-    showToast("Module order updated successfully!");
-    fetchRoadmapData();
-  } catch {
-    showToast("Failed to update module order", "error");
-    fetchRoadmapData();
-  }
-};
 </script>
 
 <style scoped>

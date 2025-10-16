@@ -1,9 +1,15 @@
+import { useAuth } from "#imports";
+
 export const useInstructors = () => {
   const config = useRuntimeConfig();
   const { getAccessToken } = useAuth();
 
   // Get all instructors with pagination and filters
-  const getInstructors = async (page: number = 1, pageSize: number = 10, filters: any = {}) => {
+  const getInstructors = async (
+    page: number = 1,
+    pageSize: number = 10,
+    filters: any = {}
+  ) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -18,21 +24,28 @@ export const useInstructors = () => {
 
       // Add optional filters
       if (filters.search) queryParams.search = filters.search;
-      if (filters.is_active !== undefined) queryParams.is_active = filters.is_active;
+      if (filters.is_active !== undefined)
+        queryParams.is_active = filters.is_active;
       if (filters.ordering) queryParams.ordering = filters.ordering;
 
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        query: queryParams,
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          query: queryParams,
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to fetch instructors", data: null };
+      return {
+        error: error?.data?.error || "Failed to fetch instructors",
+        data: null,
+      };
     }
   };
 
@@ -45,22 +58,28 @@ export const useInstructors = () => {
     }
 
     try {
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        query: {
-          page: 1,
-          page_size: 5,
-          ordering: "-created_at", // Order by creation date, newest first
-        },
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          query: {
+            page: 1,
+            page_size: 5,
+            ordering: "-created_at", // Order by creation date, newest first
+          },
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to fetch recent instructors", data: null };
+      return {
+        error: error?.data?.error || "Failed to fetch recent instructors",
+        data: null,
+      };
     }
   };
 
@@ -73,22 +92,32 @@ export const useInstructors = () => {
     }
 
     try {
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to fetch instructor", data: null };
+      return {
+        error: error?.data?.error || "Failed to fetch instructor",
+        data: null,
+      };
     }
   };
 
   // Search instructors by name
-  const searchInstructorsByName = async (name: string, page: number = 1, pageSize: number = 10) => {
+  const searchInstructorsByName = async (
+    name: string,
+    page: number = 1,
+    pageSize: number = 10
+  ) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -96,22 +125,28 @@ export const useInstructors = () => {
     }
 
     try {
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/search_by_name/`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        query: {
-          name,
-          page,
-          page_size: pageSize,
-        },
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/search_by_name/`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          query: {
+            name,
+            page,
+            page_size: pageSize,
+          },
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to search instructors", data: null };
+      return {
+        error: error?.data?.error || "Failed to search instructors",
+        data: null,
+      };
     }
   };
 
@@ -126,7 +161,7 @@ export const useInstructors = () => {
     try {
       // Check if we have a file to upload
       const hasFile = instructorData.profile_image instanceof File;
-      
+
       let body;
       let headers: any = {
         Authorization: `Bearer ${token}`,
@@ -135,8 +170,11 @@ export const useInstructors = () => {
       if (hasFile) {
         // Use FormData for file uploads
         const formData = new FormData();
-        Object.keys(instructorData).forEach(key => {
-          if (instructorData[key] !== null && instructorData[key] !== undefined) {
+        Object.keys(instructorData).forEach((key) => {
+          if (
+            instructorData[key] !== null &&
+            instructorData[key] !== undefined
+          ) {
             formData.append(key, instructorData[key]);
           }
         });
@@ -148,20 +186,29 @@ export const useInstructors = () => {
         body = instructorData;
       }
 
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/`, {
-        method: "POST",
-        headers,
-        body,
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/`,
+        {
+          method: "POST",
+          headers,
+          body,
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to create instructor", data: null };
+      return {
+        error: error?.data?.error || "Failed to create instructor",
+        data: null,
+      };
     }
   };
 
   // Update an existing instructor
-  const updateInstructor = async (instructorSlug: string, instructorData: any) => {
+  const updateInstructor = async (
+    instructorSlug: string,
+    instructorData: any
+  ) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -171,7 +218,7 @@ export const useInstructors = () => {
     try {
       // Check if we have a file to upload
       const hasFile = instructorData.profile_image instanceof File;
-      
+
       let body;
       let headers: any = {
         Authorization: `Bearer ${token}`,
@@ -180,8 +227,11 @@ export const useInstructors = () => {
       if (hasFile) {
         // Use FormData for file uploads
         const formData = new FormData();
-        Object.keys(instructorData).forEach(key => {
-          if (instructorData[key] !== null && instructorData[key] !== undefined) {
+        Object.keys(instructorData).forEach((key) => {
+          if (
+            instructorData[key] !== null &&
+            instructorData[key] !== undefined
+          ) {
             formData.append(key, instructorData[key]);
           }
         });
@@ -193,15 +243,21 @@ export const useInstructors = () => {
         body = instructorData;
       }
 
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`, {
-        method: "PUT",
-        headers,
-        body,
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`,
+        {
+          method: "PUT",
+          headers,
+          body,
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to update instructor", data: null };
+      return {
+        error: error?.data?.error || "Failed to update instructor",
+        data: null,
+      };
     }
   };
 
@@ -214,17 +270,23 @@ export const useInstructors = () => {
     }
 
     try {
-      await $fetch(`${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        credentials: "include",
-      });
+      await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`,
+        {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          credentials: "include",
+        }
+      );
       return { data: "Instructor deleted successfully", error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to delete instructor", data: null };
+      return {
+        error: error?.data?.error || "Failed to delete instructor",
+        data: null,
+      };
     }
   };
 
@@ -237,23 +299,32 @@ export const useInstructors = () => {
     }
 
     try {
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/bulk_delete/`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: { ids: instructorIds },
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/bulk_delete/`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: { ids: instructorIds },
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to delete instructors", data: null };
+      return {
+        error: error?.data?.error || "Failed to delete instructors",
+        data: null,
+      };
     }
   };
 
   // Toggle instructor status
-  const toggleInstructorStatus = async (instructorSlug: string, isActive: boolean) => {
+  const toggleInstructorStatus = async (
+    instructorSlug: string,
+    isActive: boolean
+  ) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -261,18 +332,24 @@ export const useInstructors = () => {
     }
 
     try {
-      const res = await $fetch(`${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: { is_active: isActive },
-        credentials: "include",
-      });
+      const res = await $fetch(
+        `${config.public.API_BASE_URL}api/instructors/${instructorSlug}/`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: { is_active: isActive },
+          credentials: "include",
+        }
+      );
       return { data: res, error: null };
     } catch (error: any) {
-      return { error: error?.data?.error || "Failed to toggle instructor status", data: null };
+      return {
+        error: error?.data?.error || "Failed to toggle instructor status",
+        data: null,
+      };
     }
   };
 

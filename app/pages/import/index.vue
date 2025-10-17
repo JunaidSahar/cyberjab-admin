@@ -11,6 +11,7 @@
         </p>
         <button
           @click="exportAllData"
+          :disabled="exporting"
           class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white transition-colors"
         >
           <svg
@@ -104,7 +105,8 @@
           </h1>
           <p class="text-gray-300">{{ manifest.metadata.description }}</p>
         </div>
-        <button
+        <div class="flex gap-4">
+          <button
           @click="resetData"
           class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition-colors"
         >
@@ -125,8 +127,13 @@
         </button>
         <button
           @click="importData"
-          class="flex items-center gap-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-white transition-colors"
+          :disabled="importing"
+          class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
         >
+        <template v-if="importing">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g><circle cx="3" cy="12" r="2" fill="currentColor"/><circle cx="21" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="21" r="2" fill="currentColor"/><circle cx="12" cy="3" r="2" fill="currentColor"/><circle cx="5.64" cy="5.64" r="2" fill="currentColor"/><circle cx="18.36" cy="18.36" r="2" fill="currentColor"/><circle cx="5.64" cy="18.36" r="2" fill="currentColor"/><circle cx="18.36" cy="5.64" r="2" fill="currentColor"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></svg>
+        </template>
+        <template v-else>
           <svg
             class="w-4 h-4"
             fill="none"
@@ -140,8 +147,10 @@
               d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
             />
           </svg>
-          Upload
+          </template>
+          Import
         </button>
+        </div>
       </div>
 
       <!-- Statistics Cards -->
@@ -489,20 +498,27 @@ const loadingMessage = ref("");
 const error = ref(null);
 const activeTab = ref("overview");
 const originalFile = ref(null);
+const importing = ref(false);
+const exporting = ref(false);
 
 const importData = async () => {
+  importing.value = true;
   importFile(originalFile.value, (progress) => {
     console.log(`Upload progress: ${progress.progress}%`);
   })
     .then(() => {
-      showToast("Import successful!", "success");
+      showToast("Import in process. You'll receive a notification on email once import is completed", "success");
     })
     .catch((err) => {
       showToast("Import failed: " + err.message, "error");
+    })
+    .finally(() => {
+      importing.value = false;
     });
 };
 
 const exportAllData = async () => {
+  exporting.value = true;
   const { data, error } = await exportData();
   if (error) {
     showToast("Export failed: " + error.message, "error");
@@ -510,6 +526,7 @@ const exportAllData = async () => {
   }
   console.log("Export successful:", data);
   showToast(`${data?.message}`, "success");
+  exporting.value = false;
 };
 
 const handleFileUpload = async (event) => {

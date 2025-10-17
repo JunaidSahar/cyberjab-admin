@@ -512,7 +512,7 @@
     v-show="confirmDeleteVisible"
       v-model:visible="confirmDeleteVisible"
       title="Confirm Delete"
-      message="Are you sure you want to delete this lesson?"
+      message="Are you sure you want to delete this learning path?"
       @confirm="handleDeleteConfirmation"
       @close="confirmDeleteVisible = false"
     />

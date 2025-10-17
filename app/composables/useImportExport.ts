@@ -13,7 +13,7 @@ export const useImportExport = () => {
 
   /**
    * Upload file directly to S3 using pre-signed URL
-   * Uses XHR for progress tracking, with minimal headers to avoid CORS issues
+   * Extracts content-type from URL and includes it in the request
    */
   const uploadToS3 = async (
     uploadUrl: string,
@@ -22,6 +22,18 @@ export const useImportExport = () => {
   ): Promise<void> => {
     return new Promise<void>((resolve, reject) => {
       const xhr = new XMLHttpRequest();
+
+      // Extract content-type from URL query parameters
+      let contentType = file.type || "application/zip";
+      try {
+        const url = new URL(uploadUrl);
+        const contentTypeParam = url.searchParams.get("content-type");
+        if (contentTypeParam) {
+          contentType = contentTypeParam;
+        }
+      } catch (e) {
+        console.warn("Failed to parse content-type from URL", e);
+      }
 
       // Track upload progress
       xhr.upload.addEventListener("progress", (event) => {
@@ -56,12 +68,11 @@ export const useImportExport = () => {
         reject(new Error("S3 upload aborted"))
       );
 
-      // Configure and send request
+      // Configure request
       xhr.open("PUT", uploadUrl, true);
       
-      // DO NOT set any custom headers - they trigger CORS preflight
-      // Pre-signed URL contains all necessary authentication
-      // Only set Content-Type if explicitly needed by your S3 bucket policy
+      // IMPORTANT: Set Content-Type header to match what's in the URL
+      xhr.setRequestHeader("Content-Type", contentType);
 
       xhr.send(file);
     });

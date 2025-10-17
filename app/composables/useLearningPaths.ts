@@ -23,7 +23,7 @@ interface LearningPathForm {
 }
 
 interface DeleteModalData {
-  type: 'step' | 'module' | 'modules' | '';
+  type: "step" | "module" | "modules" | "";
   name: string;
   item: Step | Module | number[] | null;
   index: number | null;
@@ -32,7 +32,7 @@ interface DeleteModalData {
 interface Toast {
   visible: boolean;
   message: string;
-  type: 'success' | 'error';
+  type: "success" | "error";
 }
 
 interface Filters {
@@ -87,7 +87,10 @@ export const useLearningPath = () => {
   const toast = ref<Toast>({ visible: false, message: "", type: "success" });
 
   // Helper Functions
-  const showToast = (message: string, type: 'success' | 'error' = "success") => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" = "success"
+  ) => {
     toast.value = { visible: true, message, type };
     setTimeout(() => (toast.value.visible = false), 2500);
   };
@@ -121,7 +124,8 @@ export const useLearningPath = () => {
       };
 
       if (filters.search) queryParams.search = filters.search;
-      if (filters.published !== undefined) queryParams.is_active = filters.published;
+      if (filters.published !== undefined)
+        queryParams.is_active = filters.published;
       if (filters.ordering) queryParams.ordering = filters.ordering;
 
       const res = await $fetch(
@@ -194,6 +198,7 @@ export const useLearningPath = () => {
       showToast(
         isEditMode.value ? "Updated successfully!" : "Saved successfully!"
       );
+      router.push("/learning-paths");
       if (isEditMode.value) fetchRoadmapData();
     } catch {
       showToast("Network error while saving.", "error");
@@ -207,7 +212,7 @@ export const useLearningPath = () => {
   };
 
   const openNewStepModal = () => (showNewStepModal.value = true);
-  
+
   const closeNewStepModal = () => {
     showNewStepModal.value = false;
     newStepName.value = "";
@@ -549,6 +554,25 @@ export const useLearningPath = () => {
     if (tab === "modules" && isEditMode.value) fetchRoadmapData();
   };
 
+  const handleDeleteLearningPath = async () => {
+    try {
+      const res = await fetch(
+        `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`,
+        {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!res.ok) throw new Error();
+      if (res.status === 204) {
+        showToast("Learning Path deleted successfully!");
+      }
+      router.push("/learning-paths");
+    } catch {
+      showToast("Failed to delete Learning Path", "error");
+    }
+  };
+
   return {
     // State
     activeTab,
@@ -590,5 +614,6 @@ export const useLearningPath = () => {
     confirmDelete,
     closeDeleteModal,
     handleTabChange,
+    handleDeleteLearningPath,
   };
 };

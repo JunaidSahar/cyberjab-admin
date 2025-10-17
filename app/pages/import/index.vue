@@ -2,11 +2,11 @@
   <div class="bg-darkBackground p-8">
     <!-- Upload Section -->
     <div v-if="!manifest" class="mx-auto max-w-7xl">
-      <div class="mb-8 text-center">
+      <div class="flex flex-col items-center mb-8 text-center">
         <h1 class="mb-2 font-bold text-headingColor text-4xl">
           CyberJab Data Viewer
         </h1>
-        <p class="text-headingColor">
+        <p class="pb-5 text-headingColor">
           Upload your CyberJab export zip file to view the contents
         </p>
         <button
@@ -452,6 +452,20 @@
         </div>
       </div>
     </div>
+    <!-- Custom Toast -->
+    <transition name="fade">
+      <div
+        v-if="toast.visible"
+        :class="[
+          'fixed top-6 right-6 px-4 py-3 rounded-lg shadow-lg text-sm font-medium z-50',
+          toast.type === 'success'
+            ? 'bg-green-500 text-white'
+            : 'bg-red-500 text-white',
+        ]"
+      >
+        {{ toast.message }}
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -460,6 +474,11 @@ import { ref } from "vue";
 import JSZip from "jszip";
 import { useImportExport } from "#imports";
 const { importFile, exportData } = useImportExport();
+const toast = ref({ visible: false, message: "", type: "success" });
+const showToast = (message, type) => {
+  toast.value = { visible: true, message, type };
+  setTimeout(() => (toast.value.visible = false), 5000);
+};
 
 const manifest = ref(null);
 const instructors = ref([]);
@@ -469,23 +488,34 @@ const loading = ref(false);
 const loadingMessage = ref("");
 const error = ref(null);
 const activeTab = ref("overview");
+const originalFile = ref(null);
 
 const importData = async () => {
-  importFile();
+  importFile(originalFile.value, (progress) => {
+    console.log(`Upload progress: ${progress.progress}%`);
+  })
+    .then(() => {
+      showToast("Import successful!", "success");
+    })
+    .catch((err) => {
+      showToast("Import failed: " + err.message, "error");
+    });
 };
 
 const exportAllData = async () => {
   const { data, error } = await exportData();
   if (error) {
-    console.error("Export failed:", error);
+    showToast("Export failed: " + error.message, "error");
     return;
   }
   console.log("Export successful:", data);
+  showToast(`${data?.message}`, "success");
 };
 
 const handleFileUpload = async (event) => {
   const file = event.target.files[0];
   if (!file) return;
+  originalFile.value = file;
 
   loading.value = true;
   error.value = null;

@@ -11,7 +11,6 @@
 ### Naming Conventions
 - **Functions**: camelCase with descriptive verbs (`getInstructors`, `createModule`, `toggleStatus`)
 - **Variables**: camelCase with clear intent (`accessTokenCookie`, `refreshTokenCookie`)
-- **Constants**: UPPER_SNAKE_CASE for configuration (`API_BASE_URL`, `API_TOKEN`)
 - **Files**: kebab-case for components, camelCase for composables (`useAuth.ts`, `module-card.vue`)
 
 ### Code Organization

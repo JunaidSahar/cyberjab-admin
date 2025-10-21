@@ -7,7 +7,8 @@ const router = useRouter();
 
 const config = useRuntimeConfig();
 const BASE_URL = config.public.API_BASE_URL;
-const TOKEN = config.public.API_TOKEN;
+const userStore = useUserStore();
+const TOKEN = userStore.token
 
 const columns = [
   { key: "first_name", title: "First Name" },

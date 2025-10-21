@@ -263,7 +263,6 @@
 </template>
 
 <script setup>
-import TiptapEditor from "../global/tiptap-editor.vue";
 import CreateCarriculum from "./create-carriculum.vue";
 
 const props = defineProps({

@@ -131,7 +131,10 @@ const route = useRoute();
 
 const config = useRuntimeConfig();
 const BASE_URL = config.public.API_BASE_URL;
-const TOKEN = config.public.API_TOKEN;
+
+const userStore = useUserStore();
+
+const TOKEN = userStore.token;
 
 // prefer prop id (when page /users/create-user/[id].vue passes it), otherwise fallback to route.params.id
 const userId = computed(() => {

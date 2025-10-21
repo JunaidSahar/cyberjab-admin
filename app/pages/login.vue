@@ -11,7 +11,7 @@
               SSO Authentication Needed
             </h2>
             <p class="mt-2 text-gray-200 text-sm">
-              Single Sign-On Authentication Portal
+              Single Sign-On Authentication Portal. 
             </p>
           </div>
 

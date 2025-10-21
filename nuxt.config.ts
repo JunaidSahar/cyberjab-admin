@@ -11,6 +11,10 @@ export default defineNuxtConfig({
     '@pinia/nuxt',
     '@nuxt/image',
   ],
+  ssr: false,
+  nitro: {
+    preset: 'static',
+  },
   tiptap: {
     prefix: 'Tiptap', 
   },

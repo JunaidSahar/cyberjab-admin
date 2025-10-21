@@ -1,0 +1,21 @@
+version: 0.2
+
+phases:
+  install:
+    commands:
+      - echo Installing dependencies...
+      - npm install
+  
+  build:
+    commands:
+      - echo Building Nuxt static site...
+      - npm run generate
+
+artifacts:
+  files:
+    - '**/*'
+  base-directory: .output/public
+
+cache:
+  paths:
+    - node_modules/**/*

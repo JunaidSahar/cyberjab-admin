@@ -33,14 +33,23 @@
 
       <div
         class="bg-darkForeground shadow-xl p-12 border border-gray-700 rounded-lg"
+        @dragover.prevent="handleDragOver"
+        @dragenter.prevent="handleDragEnter"
+        @dragleave.prevent="handleDragLeave"
+        @drop.prevent="handleDrop"
       >
         <label
           class="flex flex-col justify-center items-center p-12 border-2 border-gray-600 border-dashed rounded-lg transition-all duration-300 cursor-pointer"
-          :class="
+          :class="[
             loading
               ? 'pointer-events-none bg-gray-700/50'
-              : 'hover:bg-gray-700/30 hover:border-gray-500'
-          "
+              : 'hover:bg-gray-700/30 hover:border-gray-500',
+            isDragOver ? 'bg-blue-600/20 border-blue-500' : '',
+          ]"
+          @dragover.prevent="handleDragOver"
+          @dragenter.prevent="handleDragEnter"
+          @dragleave.prevent="handleDragLeave"
+          @drop.prevent="handleDrop"
         >
           <svg
             v-if="!loading"
@@ -107,54 +116,77 @@
         </div>
         <div class="flex gap-4">
           <button
-          @click="resetData"
-          class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition-colors"
-        >
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            @click="resetData"
+            class="flex items-center gap-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg text-white transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M6 18L18 6M6 6l12 12"
-            />
-          </svg>
-          Clear Data
-        </button>
-        <button
-          @click="importData"
-          :disabled="importing"
-          class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
-        >
-        <template v-if="importing">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g><circle cx="3" cy="12" r="2" fill="currentColor"/><circle cx="21" cy="12" r="2" fill="currentColor"/><circle cx="12" cy="21" r="2" fill="currentColor"/><circle cx="12" cy="3" r="2" fill="currentColor"/><circle cx="5.64" cy="5.64" r="2" fill="currentColor"/><circle cx="18.36" cy="18.36" r="2" fill="currentColor"/><circle cx="5.64" cy="18.36" r="2" fill="currentColor"/><circle cx="18.36" cy="5.64" r="2" fill="currentColor"/><animateTransform attributeName="transform" dur="1.5s" repeatCount="indefinite" type="rotate" values="0 12 12;360 12 12"/></g></svg>
-        </template>
-        <template v-else>
-          <svg
-            class="w-4 h-4"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            <svg
+              class="w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+            Clear Data
+          </button>
+          <button
+            @click="importData"
+            :disabled="importing"
+            class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-white transition-colors"
           >
-            <path
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              stroke-width="2"
-              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-            />
-          </svg>
-          </template>
-          Import
-        </button>
+            <template v-if="importing">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+              >
+                <g>
+                  <circle cx="3" cy="12" r="2" fill="currentColor" />
+                  <circle cx="21" cy="12" r="2" fill="currentColor" />
+                  <circle cx="12" cy="21" r="2" fill="currentColor" />
+                  <circle cx="12" cy="3" r="2" fill="currentColor" />
+                  <circle cx="5.64" cy="5.64" r="2" fill="currentColor" />
+                  <circle cx="18.36" cy="18.36" r="2" fill="currentColor" />
+                  <circle cx="5.64" cy="18.36" r="2" fill="currentColor" />
+                  <circle cx="18.36" cy="5.64" r="2" fill="currentColor" />
+                  <animateTransform
+                    attributeName="transform"
+                    dur="1.5s"
+                    repeatCount="indefinite"
+                    type="rotate"
+                    values="0 12 12;360 12 12"
+                  />
+                </g>
+              </svg>
+            </template>
+            <template v-else>
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                />
+              </svg>
+            </template>
+            Import
+          </button>
         </div>
       </div>
 
       <!-- Statistics Cards -->
-      <div class="gap-6 grid grid-cols-1 md:grid-cols-4 mb-8">
+      <!-- <div class="gap-6 grid grid-cols-1 md:grid-cols-4 mb-8">
         <div
           class="bg-darkForeground shadow-lg p-6 border border-border rounded-lg"
         >
@@ -258,10 +290,10 @@
             </svg>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Metadata Card -->
-      <div
+      <!-- <div
         class="bg-darkForeground shadow-lg mb-8 p-6 border border-border rounded-lg"
       >
         <h2 class="mb-4 font-bold text-white text-2xl">Export Information</h2>
@@ -307,13 +339,13 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- Tabs -->
       <div
         class="bg-darkForeground shadow-lg border border-border rounded-lg overflow-hidden"
       >
-        <div class="flex border-b border-border">
+        <div class="flex border-border border-b">
           <button
             @click="activeTab = 'overview'"
             :class="[
@@ -500,6 +532,65 @@ const activeTab = ref("overview");
 const originalFile = ref(null);
 const importing = ref(false);
 const exporting = ref(false);
+const isDragOver = ref(false);
+
+// Drag and drop handlers
+const handleDragOver = (event) => {
+  event.preventDefault();
+  event.dataTransfer.dropEffect = "copy";
+};
+
+const handleDragEnter = (event) => {
+  event.preventDefault();
+  isDragOver.value = true;
+};
+
+const handleDragLeave = (event) => {
+  event.preventDefault();
+  // Only set to false if we're leaving the drop zone entirely
+  if (!event.currentTarget.contains(event.relatedTarget)) {
+    isDragOver.value = false;
+  }
+};
+
+const handleDrop = (event) => {
+  event.preventDefault();
+  isDragOver.value = false;
+
+  if (loading.value) return;
+
+  const files = event.dataTransfer.files;
+  console.log("Files dropped:", files.length, files);
+
+  if (files.length > 0) {
+    const file = files[0];
+    console.log("File details:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
+
+    // More flexible ZIP file detection
+    const isZipFile =
+      file.type === "application/zip" ||
+      file.type === "application/x-zip-compressed" ||
+      file.name.toLowerCase().endsWith(".zip");
+
+    if (isZipFile) {
+      console.log("Valid ZIP file detected, processing...");
+      // Create a fake event object to pass to handleFileUpload
+      const fakeEvent = {
+        target: {
+          files: [file],
+        },
+      };
+      handleFileUpload(fakeEvent);
+    } else {
+      console.log("Invalid file type:", file.type);
+      error.value = `Please upload a ZIP file only. Detected type: ${file.type}`;
+    }
+  }
+};
 
 const importData = async () => {
   importing.value = true;
@@ -507,7 +598,10 @@ const importData = async () => {
     console.log(`Upload progress: ${progress.progress}%`);
   })
     .then(() => {
-      showToast("Import in process. You'll receive a notification on email once import is completed", "success");
+      showToast(
+        "Import in process. You'll receive a notification on email once import is completed",
+        "success"
+      );
     })
     .catch((err) => {
       showToast("Import failed: " + err.message, "error");

@@ -149,9 +149,13 @@ export const useLearningPath = () => {
     }
   };
 
-  const fetchRoadmapData = async () => {
+  const fetchRoadmapData = async (preserveSelectedStep = false) => {
     if (!isEditMode.value) return;
     loading.value = true;
+    
+    // Store the currently selected step name to preserve selection
+    const currentSelectedStepName = preserveSelectedStep ? selectedStep.value?.step_name : null;
+    
     try {
       const res = await fetch(
         `${config.public.API_BASE_URL}api/lms/roadmaps/${route.params.slug}/`
@@ -165,7 +169,14 @@ export const useLearningPath = () => {
         duration_days: data.duration_days,
       };
       steps.value = data.steps || [];
-      if (steps.value.length > 0) selectedStep.value = steps.value[0];
+      
+      // Preserve the selected step if requested, otherwise default to first step
+      if (preserveSelectedStep && currentSelectedStepName) {
+        const foundStep = steps.value.find(step => step.step_name === currentSelectedStepName);
+        selectedStep.value = foundStep || (steps.value.length > 0 ? steps.value[0] : null);
+      } else if (steps.value.length > 0) {
+        selectedStep.value = steps.value[0];
+      }
     } catch {
       showToast("Failed to load learning path", "error");
     } finally {
@@ -249,7 +260,7 @@ export const useLearningPath = () => {
 
       showToast("Step created successfully!");
       selectedStep.value = newStep;
-      await fetchRoadmapData();
+      await fetchRoadmapData(true); // Preserve selected step (the newly created one)
       closeNewStepModal();
     } catch (error) {
       showToast("Failed to create step", "error");
@@ -320,7 +331,7 @@ export const useLearningPath = () => {
       showToast("Step order updated successfully!");
     } catch {
       showToast("Failed to update step order", "error");
-      fetchRoadmapData();
+      fetchRoadmapData(true); // Preserve selected step
     }
   };
 
@@ -402,7 +413,7 @@ export const useLearningPath = () => {
       if (!res.ok) throw new Error();
 
       showToast("Module added successfully!");
-      fetchRoadmapData();
+      fetchRoadmapData(true); // Preserve selected step
       closeAddModuleModal();
     } catch {
       showToast("Failed to add module", "error");
@@ -463,7 +474,7 @@ export const useLearningPath = () => {
       if (!res.ok) throw new Error();
 
       showToast("Module deleted successfully!");
-      await fetchRoadmapData();
+      await fetchRoadmapData(true); // Preserve selected step
       closeDeleteModal();
     } catch {
       showToast("Failed to delete module", "error");
@@ -499,7 +510,7 @@ export const useLearningPath = () => {
 
       showToast(`${moduleIdsToDelete.length} module(s) deleted successfully!`);
       selectedModules.value = [];
-      await fetchRoadmapData();
+      await fetchRoadmapData(true); // Preserve selected step
       closeDeleteModal();
     } catch {
       showToast("Failed to delete modules", "error");
@@ -519,10 +530,10 @@ export const useLearningPath = () => {
       );
       if (!res.ok) throw new Error();
       showToast("Module order updated successfully!");
-      fetchRoadmapData();
+      fetchRoadmapData(true); // Preserve selected step
     } catch {
       showToast("Failed to update module order", "error");
-      fetchRoadmapData();
+      fetchRoadmapData(true); // Preserve selected step
     }
   };
 
@@ -551,7 +562,7 @@ export const useLearningPath = () => {
   const handleTabChange = (tab: string) => {
     activeTab.value = tab;
     router.push({ query: { ...route.query, tab } });
-    if (tab === "modules" && isEditMode.value) fetchRoadmapData();
+    if (tab === "modules" && isEditMode.value) fetchRoadmapData(true); // Preserve selected step when switching to modules tab
   };
 
   const handleDeleteLearningPath = async () => {

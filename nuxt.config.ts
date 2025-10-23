@@ -7,18 +7,14 @@ export default defineNuxtConfig({
     '@nuxt/icon',
     '@nuxt/fonts',
     'nuxt-charts',
-    'nuxt-tiptap-editor',
     '@pinia/nuxt',
     '@nuxt/image',
   ],
-  tiptap: {
-    prefix: 'Tiptap', 
-  },
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
     public: {
       API_BASE_URL: process.env.API_BASE_URL || 'https://api.cyberjab.org/',
-      },
+    },
   },
 })

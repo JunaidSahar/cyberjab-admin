@@ -104,15 +104,17 @@
         </button>
       </div>
     </div>
-    <TiptapEditorContent :editor="editor" class="text-headingColor" />
+    <editor-content :editor="editor" class="text-headingColor" />
   </div>
 </template>
 
 <script setup>
+import { useEditor, EditorContent } from '@tiptap/vue-3'
+import StarterKit from '@tiptap/starter-kit'
+import { BulletList, ListItem, OrderedList } from "@tiptap/extension-list";
 import { FontSize, TextStyle } from "@tiptap/extension-text-style";
 import Underline from "@tiptap/extension-underline";
 import TextAlign from "@tiptap/extension-text-align";
-import { BulletList, ListItem, OrderedList } from "@tiptap/extension-list";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
 
@@ -142,7 +144,7 @@ const getInitialContent = () => {
 const editor = useEditor({
   content: getInitialContent(),
   extensions: [
-    TiptapStarterKit,
+    StarterKit,
     TextStyle,
     FontSize,
     Underline,

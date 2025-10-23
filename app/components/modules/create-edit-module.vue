@@ -67,10 +67,10 @@
         <h3 class="pb-5 text-headingColor text-2xl text-center">Image</h3>
 
         <div class="bg-darkBackground rounded-lg w-full min-h-60 flex items-center justify-center overflow-hidden">
-          <img 
-            v-if="imagePreview || props.moduleData?.photo" 
-            :src="imagePreview || props.moduleData?.photo" 
-            :alt="formData.name || 'Module photo'" 
+          <img
+            v-if="imagePreview || props.moduleData?.photo"
+            :src="imagePreview || props.moduleData?.photo"
+            :alt="formData.name || 'Module photo'"
             class="w-full h-full object-cover"
           />
           <div v-else class="text-gray-400 text-center">
@@ -263,7 +263,6 @@
 </template>
 
 <script setup>
-import TiptapEditor from "../global/tiptap-editor.vue";
 import CreateCarriculum from "./create-carriculum.vue";
 
 const props = defineProps({
@@ -569,10 +568,10 @@ const imagePreview = ref('');
 const handleFileUpload = (event) => {
   const target = event.target;
   const file = target.files?.[0];
-  
+
   if (file) {
     formData.value.photo = file;
-    
+
     // Create preview URL
     const reader = new FileReader();
     reader.onload = (e) => {

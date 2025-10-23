@@ -3,14 +3,13 @@ import { ref, onMounted } from "vue";
 import DataTable from "~/components/global/data-table.vue";
 import { useRouter } from "vue-router";
 
-
 const router = useRouter();
 
 const config = useRuntimeConfig();
 const BASE_URL = config.public.API_BASE_URL;
 const { getAccessToken } = useAuth();
 
-const TOKEN = getAccessToken()
+const TOKEN = getAccessToken();
 
 const columns = [
   { key: "first_name", title: "First Name" },
@@ -29,15 +28,12 @@ const loading = ref(true);
 const fetchUsers = async () => {
   loading.value = true;
   try {
-    const res = await fetch(
-      `${BASE_URL}api/users/admin/users/?page=1&page_size=20`,
-      {
-        headers: {
-          Authorization: `Bearer ${TOKEN}`,
-          "Content-Type": "application/json",
-        },
-      }
-    );
+    const res = await fetch(`${BASE_URL}api/users/admin/users/?page=1&page_size=20`, {
+      headers: {
+        Authorization: `Bearer ${TOKEN}`,
+        "Content-Type": "application/json",
+      },
+    });
 
     if (!res.ok) throw new Error(`API error: ${res.status}`);
     const result = await res.json();
@@ -50,9 +46,7 @@ const fetchUsers = async () => {
       email: u.email,
       roles: u.is_staff ? "Admin" : "User",
       status: u.is_active ? "Active" : "Inactive",
-      last_login: u.last_login
-        ? new Date(u.last_login).toLocaleDateString()
-        : "-",
+      last_login: u.last_login ? new Date(u.last_login).toLocaleDateString() : "-",
       created_at: new Date(u.date_joined).toLocaleDateString(),
     }));
   } catch (err) {
@@ -66,7 +60,10 @@ onMounted(fetchUsers);
 
 // call this when DataTable emits "delete" with the row object
 async function handleDelete(row: any) {
-  if (!confirm(`Are you sure you want to delete ${row.first_name} ${row.last_name || ''}?`)) return;
+  if (
+    !confirm(`Are you sure you want to delete ${row.first_name} ${row.last_name || ""}?`)
+  )
+    return;
 
   try {
     const url = `${BASE_URL}api/users/admin/users/${row.id}/`; // matches backend curl
@@ -101,7 +98,6 @@ async function handleDelete(row: any) {
   }
 }
 
-
 // ✅ Handle Edit / Delete from Dropdown
 function handleAction({ action, row }: any) {
   if (action === "edit") {
@@ -117,8 +113,10 @@ function handleAction({ action, row }: any) {
     <!-- Header -->
     <div class="flex justify-between items-center w-full">
       <h1 class="text-headingColor text-3xl">Users</h1>
-      <button @click="() => router.push('/users/create-user')"
-        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all">
+      <button
+        @click="() => router.push('/users/create-user')"
+        class="flex items-center gap-2 bg-[#292D32] hover:bg-darkForeground px-5 py-2.5 rounded-lg font-semibold text-headingColor transition-all"
+      >
         <Icon name="material-symbols:add" />
         Create
       </button>
@@ -126,7 +124,13 @@ function handleAction({ action, row }: any) {
 
     <!-- Table -->
     <div class="pt-5">
-      <DataTable v-if="!loading" :columns="columns" :data="data" @action="handleAction" @delete="handleDelete" />
+      <DataTable
+        v-if="!loading"
+        :columns="columns"
+        :data="data"
+        @action="handleAction"
+        @delete="handleDelete"
+      />
       <div v-else class="text-center py-10">Loading users...</div>
     </div>
   </div>

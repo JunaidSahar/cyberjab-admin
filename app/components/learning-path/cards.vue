@@ -13,7 +13,7 @@
         <div
           class="flex justify-center items-center bg-[#292D32] rounded-md w-16 h-16"
         >
-          <Icon name="iconoir:learning" class="w-10 h-12 text-headingColor" />
+          <Icon :name="props?.role == 'role' ? 'clarity:administrator-solid' : 'material-symbols:android-cell-4-bar'" class="w-10 h-12 text-headingColor" />
         </div>
       </div>
       <div class="flex justify-between items-center pt-16">

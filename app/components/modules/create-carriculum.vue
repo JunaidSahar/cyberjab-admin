@@ -6,7 +6,10 @@
         v-if="loading"
         class="flex justify-center items-center gap-2 min-h-72 text-headingColor/50 text-center"
       >
-        <Icon name="svg-spinners:180-ring-with-bg" class="w-5 h-5 animate-spin" />
+        <Icon
+          name="svg-spinners:180-ring-with-bg"
+          class="w-5 h-5 animate-spin"
+        />
         Loading...
       </div>
       <div v-else-if="!lessons.length">
@@ -35,7 +38,9 @@
           <div
             class="flex justify-between items-center bg-darkForeground px-3 py-2 rounded-lg transition-all cursor-pointer"
             @click="selectCarriculum(item, index)"
-            :class="selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''"
+            :class="
+              selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''
+            "
           >
             <div class="flex items-center gap-3">
               <Icon
@@ -48,7 +53,9 @@
                     {{ item.name || "Untitled Lesson" }}
                   </p>
                   <div class="flex items-center gap-3">
-                    <div class="flex items-center gap-1 text-headingColor text-xs">
+                    <div
+                      class="flex items-center gap-1 text-headingColor text-xs"
+                    >
                       <Icon name="mingcute:time-duration-line" />
                       <span>{{ item.duration || "0m" }}</span>
                     </div>
@@ -102,7 +109,11 @@
       </div>
 
       <!-- Lesson Form -->
-      <form v-else @submit.prevent="saveLessonChanges" class="gap-5 grid grid-cols-2">
+      <form
+        v-else
+        @submit.prevent="saveLessonChanges"
+        class="gap-5 grid grid-cols-2"
+      >
         <!-- Title -->
         <div class="flex flex-col gap-2 col-span-2">
           <label for="lessonTitle" class="text-headingColor">
@@ -328,26 +339,46 @@ const deleteCarriculum = async () => {
   const lessonToDelete = lessons.value[index];
 
   try {
-    // Emit deletion event for parent to handle API call
-    const deleteResponse = await deleteLesson(lessonToDelete.slug);
-    if (deleteResponse.error) {
-      throw new Error(deleteResponse.error);
+    // Check if it's a newly added lesson that hasn't been saved to server
+    if (lessonToDelete.is_new) {
+      // Handle local deletion for new lessons
+      console.log("Deleting newly added lesson locally:", lessonToDelete);
+
+      // Remove from local array immediately
+      lessons.value.splice(index, 1);
+
+      // Reset selection if deleted item was selected
+      if (selectedCarriculumIndex.value === index) {
+        selectedCarriculum.value = {};
+        selectedCarriculumIndex.value = null;
+      } else if (selectedCarriculumIndex.value > index) {
+        selectedCarriculumIndex.value--;
+      }
+
+      // Emit event for parent to handle local cleanup
+      emit("lesson-deleted", lessonToDelete);
+    } else {
+      // Handle API deletion for existing lessons
+      const deleteResponse = await deleteLesson(lessonToDelete.slug);
+      if (deleteResponse.error) {
+        throw new Error(deleteResponse.error);
+      }
+
+      emit("lesson-deleted", lessonToDelete);
+
+      // Remove from local array
+      lessons.value.splice(index, 1);
+
+      // Reset selection if deleted item was selected
+      if (selectedCarriculumIndex.value === index) {
+        selectedCarriculum.value = {};
+        selectedCarriculumIndex.value = null;
+      } else if (selectedCarriculumIndex.value > index) {
+        selectedCarriculumIndex.value--;
+      }
+
+      console.log("Lesson deleted from server:", lessonToDelete);
     }
-
-    emit("lesson-deleted", lessonToDelete);
-
-    // Remove from local array
-    lessons.value.splice(index, 1);
-
-    // Reset selection if deleted item was selected
-    if (selectedCarriculumIndex.value === index) {
-      selectedCarriculum.value = {};
-      selectedCarriculumIndex.value = null;
-    } else if (selectedCarriculumIndex.value > index) {
-      selectedCarriculumIndex.value--;
-    }
-
-    console.log("Lesson deleted:", lessonToDelete);
   } catch (error) {
     console.error("Error deleting lesson:", error);
     alert("Failed to delete lesson. Please try again.");
@@ -358,7 +389,10 @@ const deleteCarriculum = async () => {
 };
 
 const saveLessonChanges = async () => {
-  if (selectedCarriculumIndex.value === null || !selectedCarriculum.value.name?.trim()) {
+  if (
+    selectedCarriculumIndex.value === null ||
+    !selectedCarriculum.value.name?.trim()
+  ) {
     return;
   }
 
@@ -367,7 +401,9 @@ const saveLessonChanges = async () => {
   try {
     // Auto-generate slug if empty
     if (!selectedCarriculum.value.slug && selectedCarriculum.value.name) {
-      selectedCarriculum.value.slug = generateSlug(selectedCarriculum.value.name);
+      selectedCarriculum.value.slug = generateSlug(
+        selectedCarriculum.value.name
+      );
     }
 
     // Update the lesson in the array

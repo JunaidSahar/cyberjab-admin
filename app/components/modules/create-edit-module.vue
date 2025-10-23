@@ -13,7 +13,7 @@
       </h1>
     </div>
     <div
-      class="flex justify-between items-center gap-2 pt-5 border-b border-border w-full"
+      class="flex justify-between items-center gap-2 pt-5 border-border border-b w-full"
     >
       <div class="space-x-8">
         <button
@@ -40,17 +40,17 @@
           type="button"
           class="pb-6 border-b-2 text-headingColor"
         >
-          Carriculum
+          Curriculum
         </button>
       </div>
 
       <div class="flex items-center gap-2 pb-4" v-if="props.mode !== 'create'">
-        <button
+        <!-- <button
           class="flex items-center gap-2 bg-darkForeground px-5 py-2 rounded-lg text-white text-sm"
         >
           <Icon name="mdi:eye-outline" />
           Preview
-        </button>
+        </button> -->
         <button
           @click="publishModule"
           :disabled="loading || !isFormValid"
@@ -66,7 +66,9 @@
       <div class="bg-darkForeground p-6 rounded-xl w-[30%]">
         <h3 class="pb-5 text-headingColor text-2xl text-center">Image</h3>
 
-        <div class="bg-darkBackground rounded-lg w-full min-h-60 flex items-center justify-center overflow-hidden">
+        <div
+          class="flex justify-center items-center bg-darkBackground rounded-lg w-full min-h-60 overflow-hidden"
+        >
           <img
             v-if="imagePreview || props.moduleData?.photo"
             :src="imagePreview || props.moduleData?.photo"
@@ -74,7 +76,10 @@
             class="w-full h-full object-cover"
           />
           <div v-else class="text-gray-400 text-center">
-            <Icon name="material-symbols:broken-image-outline" class="w-16 h-16 mx-auto mb-2" />
+            <Icon
+              name="material-symbols:broken-image-outline"
+              class="mx-auto mb-2 w-16 h-16"
+            />
             <p>No image uploaded</p>
           </div>
         </div>
@@ -83,7 +88,9 @@
           <div
             class="group bg-gradient-to-r from-[#00B9FF] to-[#4E47FF] p-px rounded-lg w-fit"
           >
-            <label class="flex bg-darkForeground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer">
+            <label
+              class="flex bg-darkForeground group-hover:bg-transparent px-4 py-2 rounded-lg w-full text-white text-sm transition-all cursor-pointer"
+            >
               Upload Photo
               <input
                 type="file"
@@ -157,12 +164,16 @@
               :class="[
                 'bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm',
                 fieldErrors.instructor ? 'border border-red-500' : '',
-                instructorsLoading ? 'opacity-50 cursor-not-allowed' : ''
+                instructorsLoading ? 'opacity-50 cursor-not-allowed' : '',
               ]"
               @change="validateField('instructor')"
             >
               <option value="" disabled>
-                {{ instructorsLoading ? 'Loading instructors...' : 'Select an instructor' }}
+                {{
+                  instructorsLoading
+                    ? "Loading instructors..."
+                    : "Select an instructor"
+                }}
               </option>
               <option
                 v-for="(ins, index) in instructors"
@@ -178,7 +189,9 @@
           </div>
 
           <div class="flex flex-col gap-2 col-span-2">
-            <label for="plans" class="text-headingColor">Subscription Plans</label>
+            <label for="plans" class="text-headingColor"
+              >Subscription Plans</label
+            >
             <select
               v-model="formData.plans"
               name="plans"
@@ -187,19 +200,17 @@
               :disabled="plansLoading"
               :class="[
                 'bg-darkBackground px-4 py-3 rounded-lg text-headingColor/30 text-sm min-h-20',
-                plansLoading ? 'opacity-50 cursor-not-allowed' : ''
+                plansLoading ? 'opacity-50 cursor-not-allowed' : '',
               ]"
             >
               <option v-if="plansLoading" disabled>Loading plans...</option>
-              <option
-                v-for="plan in plans"
-                :key="plan.id"
-                :value="plan.id"
-              >
+              <option v-for="plan in plans" :key="plan.id" :value="plan.id">
                 {{ plan.name }} - ${{ plan.price }}
               </option>
             </select>
-            <p class="text-xs text-gray-400">Hold Ctrl/Cmd to select multiple plans</p>
+            <p class="text-gray-400 text-xs">
+              Hold Ctrl/Cmd to select multiple plans
+            </p>
           </div>
 
           <div class="flex flex-col gap-2 col-span-2">
@@ -562,7 +573,7 @@ const saveDraft = () => {
 };
 
 // Image preview
-const imagePreview = ref('');
+const imagePreview = ref("");
 
 // Handle file upload
 const handleFileUpload = (event) => {

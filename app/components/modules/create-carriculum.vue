@@ -142,8 +142,22 @@
           />
         </div>
 
+        <div class="flex flex-col gap-2 col-span-1">
+          <label for="contentType" class="text-headingColor">Content Type</label>
+          <select
+            id="contentType"
+            v-model="selectedCarriculum.content_type"
+            type="text"
+            placeholder="html, markdown"
+            class="bg-darkBackground placeholder:opacity-30 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-headingColor text-sm"
+          >
+            <option value="html">HTML</option>
+            <option value="markdown">Markdown</option>
+          </select>
+        </div>
+
         <!-- Lab Toggle -->
-        <div class="flex flex-col gap-2 col-span-2">
+        <div class="flex flex-col gap-2 col-span-1">
           <label class="text-headingColor">Lab</label>
           <div class="flex items-center space-x-2 min-h-10">
             <input
@@ -171,13 +185,37 @@
             </ClientOnly>
           </div>
           <div v-if="selectedCarriculum.content_type === 'markdown'">
-            <div v-if="previewMarkdown" v-html="marked(selectedCarriculum.content)"></div>
-            <textarea
-              v-else
-              v-model="selectedCarriculum.content"
-              placeholder="Enter lesson content..."
-              class="bg-darkBackground placeholder:opacity-30 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-headingColor text-sm"
-            />
+            <ul
+              class="flex flex-wrap text-sm font-medium text-center text-gray-500 border-b border-gray-200 dark:border-gray-700 dark:text-gray-400"
+            >
+              <li
+                class="inline-block p-4 rounded-t-lg hover:bg-gray-800 hover:text-gray-300"
+                :class="previewMarkdown && 'bg-gray-800 text-blue-500'"
+                @click="previewMarkdown = true"
+              >
+                Preview
+              </li>
+              <li
+                class="inline-block p-4 rounded-t-lg hover:bg-gray-800 hover:text-gray-300"
+                :class="!previewMarkdown && 'bg-gray-800 text-blue-500'"
+                @click="previewMarkdown = false"
+              >
+                Edit
+              </li>
+            </ul>
+            <div
+              class="prose prose-invert"
+              v-if="previewMarkdown"
+              v-html="marked(selectedCarriculum.content)"
+            ></div>
+            <div v-else>
+              <textarea
+                v-model="selectedCarriculum.content"
+                rows="30"
+                class="w-full bg-darkBackground text-headingColor p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono placeholder:opacity-30"
+                placeholder="Enter markdown content here..."
+              ></textarea>
+            </div>
           </div>
         </div>
 
@@ -253,6 +291,7 @@ const lessonLoading = ref(false);
 const loading = ref(false);
 const deleteIndex = ref(null);
 const isCreatingLesson = ref(false);
+const previewMarkdown = ref(false);
 
 // Fetch lessons from API
 const fetchLessons = async () => {
@@ -417,6 +456,7 @@ const saveLessonChanges = async () => {
         duration: selectedCarriculum.value.duration,
         has_lab: selectedCarriculum.value.has_lab,
         content: selectedCarriculum.value.content,
+        content_type: selectedCarriculum.value.content_type || "html",
         order: selectedCarriculum.value.order,
       });
     } else {
@@ -427,6 +467,7 @@ const saveLessonChanges = async () => {
         content: selectedCarriculum.value.content,
         order: selectedCarriculum.value.order,
         module: props.moduleId,
+        content_type: selectedCarriculum.value.content_type || "html",
         slug: props.value.slug,
       });
     }

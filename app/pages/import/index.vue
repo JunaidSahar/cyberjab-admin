@@ -419,8 +419,8 @@
                   :key="module.id"
                   class="bg-gray-700 p-3 border border-gray-600 rounded"
                 >
-                  <p class="font-semibold text-white">{{ module.title }}</p>
-                  <p class="text-gray-300 text-sm">{{ module.description }}</p>
+                  <p class="font-semibold text-white">{{ module.name }}</p>
+                  <!-- <p class="text-gray-300 text-sm">{{ module.description }}</p> -->
                 </div>
               </div>
             </div>
@@ -433,8 +433,8 @@
                   :key="roadmap.id"
                   class="bg-gray-700 p-3 border border-gray-600 rounded"
                 >
-                  <p class="font-semibold text-white">{{ roadmap.title }}</p>
-                  <p class="text-gray-300 text-sm">{{ roadmap.description }}</p>
+                  <p class="font-semibold text-white">{{ roadmap.name }}</p>
+                  <!-- <p class="text-gray-300 text-sm">{{ roadmap.description }}</p> -->
                 </div>
               </div>
             </div>

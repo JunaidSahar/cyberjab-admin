@@ -6,10 +6,7 @@
         v-if="loading"
         class="flex justify-center items-center gap-2 min-h-72 text-headingColor/50 text-center"
       >
-        <Icon
-          name="svg-spinners:180-ring-with-bg"
-          class="w-5 h-5 animate-spin"
-        />
+        <Icon name="svg-spinners:180-ring-with-bg" class="w-5 h-5 animate-spin" />
         Loading...
       </div>
       <div v-else-if="!lessons.length">
@@ -38,9 +35,7 @@
           <div
             class="flex justify-between items-center bg-darkForeground px-3 py-2 rounded-lg transition-all cursor-pointer"
             @click="selectCarriculum(item, index)"
-            :class="
-              selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''
-            "
+            :class="selectedCarriculumIndex === index ? 'ring-2 ring-blue-500' : ''"
           >
             <div class="flex items-center gap-3">
               <Icon
@@ -53,9 +48,7 @@
                     {{ item.name || "Untitled Lesson" }}
                   </p>
                   <div class="flex items-center gap-3">
-                    <div
-                      class="flex items-center gap-1 text-headingColor text-xs"
-                    >
+                    <div class="flex items-center gap-1 text-headingColor text-xs">
                       <Icon name="mingcute:time-duration-line" />
                       <span>{{ item.duration || "0m" }}</span>
                     </div>
@@ -109,11 +102,7 @@
       </div>
 
       <!-- Lesson Form -->
-      <form
-        v-else
-        @submit.prevent="saveLessonChanges"
-        class="gap-5 grid grid-cols-2"
-      >
+      <form v-else @submit.prevent="saveLessonChanges" class="gap-5 grid grid-cols-2">
         <!-- Title -->
         <div class="flex flex-col gap-2 col-span-2">
           <label for="lessonTitle" class="text-headingColor">
@@ -172,12 +161,24 @@
         <!-- Content Editor -->
         <div class="flex flex-col gap-2 col-span-2">
           <label for="lessonContent" class="text-headingColor">Content</label>
-          <ClientOnly>
-            <TiptapEditor
+
+          <div v-if="selectedCarriculum.content_type !== 'markdown'">
+            <ClientOnly>
+              <TiptapEditor
+                v-model="selectedCarriculum.content"
+                :placeholder="'Enter lesson content...'"
+              />
+            </ClientOnly>
+          </div>
+          <div v-if="selectedCarriculum.content_type === 'markdown'">
+            <div v-if="previewMarkdown" v-html="marked(selectedCarriculum.content)"></div>
+            <textarea
+              v-else
               v-model="selectedCarriculum.content"
-              :placeholder="'Enter lesson content...'"
+              placeholder="Enter lesson content..."
+              class="bg-darkBackground placeholder:opacity-30 px-4 py-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-headingColor text-sm"
             />
-          </ClientOnly>
+          </div>
         </div>
 
         <!-- Action Buttons -->
@@ -215,6 +216,7 @@
 <script setup>
 import draggable from "vuedraggable";
 import TiptapEditor from "../global/tiptap-editor.vue";
+import { marked } from "marked";
 
 const { getLessons, createLesson, updateLesson, deleteLesson } = useLesson();
 
@@ -389,10 +391,7 @@ const deleteCarriculum = async () => {
 };
 
 const saveLessonChanges = async () => {
-  if (
-    selectedCarriculumIndex.value === null ||
-    !selectedCarriculum.value.name?.trim()
-  ) {
+  if (selectedCarriculumIndex.value === null || !selectedCarriculum.value.name?.trim()) {
     return;
   }
 
@@ -401,9 +400,7 @@ const saveLessonChanges = async () => {
   try {
     // Auto-generate slug if empty
     if (!selectedCarriculum.value.slug && selectedCarriculum.value.name) {
-      selectedCarriculum.value.slug = generateSlug(
-        selectedCarriculum.value.name
-      );
+      selectedCarriculum.value.slug = generateSlug(selectedCarriculum.value.name);
     }
 
     // Update the lesson in the array

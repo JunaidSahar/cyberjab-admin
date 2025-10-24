@@ -6,7 +6,7 @@ export const useLesson = () => {
   const getLessons = async (
     page: number = 1,
     pageSize: number = 10,
-    moduleId: string
+    moduleSlug: string
   ) => {
     const token = getAccessToken();
 
@@ -20,7 +20,7 @@ export const useLesson = () => {
         page_size: pageSize,
       };
       const res = await $fetch(
-        `${config.public.API_BASE_URL}api/lms/modules/${moduleId}/lessons/`,
+        `${config.public.API_BASE_URL}api/lms/modules/${moduleSlug}/lessons/`,
         {
           method: "GET",
           headers: {
@@ -33,15 +33,16 @@ export const useLesson = () => {
       );
       return { data: res, error: null };
     } catch (error: any) {
+      console.error("Error fetching lessons:", error);
       return {
-        error: error?.data?.error || "Failed to fetch modules",
+        error: error?.data?.error || error?.message || "Failed to fetch lessons",
         data: null,
       };
     }
   };
 
   //create a new lesson
-  const createLesson = async (lessonData: any) => {
+  const createLesson = async (lessonData: any, moduleSlug: string) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -49,8 +50,9 @@ export const useLesson = () => {
     }
 
     try {
+      console.log("Creating lesson with data:", lessonData);
       const res = await $fetch(
-        `${config.public.API_BASE_URL}api/lms/lessons/`,
+        `${config.public.API_BASE_URL}api/lms/modules/${moduleSlug}/lessons/`,
         {
           method: "POST",
           headers: {
@@ -61,17 +63,19 @@ export const useLesson = () => {
           credentials: "include",
         }
       );
+      console.log("Lesson created successfully:", res);
       return { data: res, error: null };
     } catch (error: any) {
+      console.error("Error creating lesson:", error);
       return {
-        error: error?.data?.error || "Failed to create lesson",
+        error: error?.data?.error || error?.message || "Failed to create lesson",
         data: null,
       };
     }
   };
 
   //update lesson by slug
-  const updateLesson = async (lessonSlug: string, lessonData: any) => {
+  const updateLesson = async (moduleSlug: string, lessonSlug: string, lessonData: any) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -79,10 +83,12 @@ export const useLesson = () => {
     }
 
     try {
+      console.log(`Updating lesson ${lessonSlug} in module ${moduleSlug} with data:`, lessonData);
+      
       const res = await $fetch(
-        `${config.public.API_BASE_URL}api/lms/lessons/${lessonSlug}/`,
+        `${config.public.API_BASE_URL}api/lms/modules/${moduleSlug}/lessons/${lessonSlug}/`,
         {
-          method: "PUT",
+          method: "PATCH",
           headers: {
             "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
@@ -91,16 +97,24 @@ export const useLesson = () => {
           credentials: "include",
         }
       );
+      console.log("Lesson updated successfully:", res);
       return { data: res, error: null };
     } catch (error: any) {
+      console.error("Error updating lesson:", error);
+      console.error("Error details:", {
+        status: error?.status,
+        statusText: error?.statusText,
+        data: error?.data,
+      });
+      
       return {
-        error: error?.data?.error || "Failed to update lesson",
+        error: error?.data?.error || error?.data?.detail || error?.message || "Failed to update lesson",
         data: null,
       };
     }
   };
 
-  const deleteLesson = async (lessonSlug: string) => {
+  const deleteLesson = async (moduleSlug: string, lessonSlug: string) => {
     const token = getAccessToken();
 
     if (!token) {
@@ -108,8 +122,9 @@ export const useLesson = () => {
     }
 
     try {
+      console.log(`Deleting lesson: ${lessonSlug} from module: ${moduleSlug}`);
       const res = await $fetch(
-        `${config.public.API_BASE_URL}api/lms/lessons/${lessonSlug}/`,
+        `${config.public.API_BASE_URL}api/lms/modules/${moduleSlug}/lessons/${lessonSlug}/`,
         {
           method: "DELETE",
           headers: {
@@ -119,10 +134,12 @@ export const useLesson = () => {
           credentials: "include",
         }
       );
+      console.log("Lesson deleted successfully");
       return { data: res, error: null };
     } catch (error: any) {
+      console.error("Error deleting lesson:", error);
       return {
-        error: error?.data?.error || "Failed to delete lesson",
+        error: error?.data?.error || error?.message || "Failed to delete lesson",
         data: null,
       };
     }

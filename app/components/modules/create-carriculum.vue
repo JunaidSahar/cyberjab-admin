@@ -233,7 +233,7 @@
             :disabled="lessonLoading || !selectedCarriculum.name?.trim()"
             class="bg-[linear-gradient(90deg,_#00B9FF_0%,_#4E47FF_100%)] disabled:opacity-50 px-5 py-2.5 rounded-lg text-white transition-opacity"
           >
-            {{ lessonLoading ? "Creating..." : "Save Lesson" }}
+            {{ lessonLoading ? "Saving..." : "Save Lesson" }}
           </button>
         </div>
       </form>
@@ -302,7 +302,7 @@ const fetchLessons = async () => {
 
   loading.value = true;
   try {
-    const data = await getLessons(1, 100, props.moduleSlug); // Get all lessons
+    const data = await getLessons(1, 100, props.moduleSlug);
     if (data && data.data) {
       lessons.value = data.data || [];
     } else if (data && data.error) {
@@ -344,27 +344,30 @@ const generateTempId = () => {
 
 // Curriculum Management Functions
 const selectCarriculum = (item, index) => {
-  selectedCarriculum.value = { ...item };
+  selectedCarriculum.value = { 
+    ...item,
+    is_new: item.is_new || false
+  };
   selectedCarriculumIndex.value = index;
 };
 
 const addNewLesson = () => {
   const newLesson = {
-    id: generateTempId(), // Temporary ID for new lessons
+    id: generateTempId(),
     name: "",
     duration: "",
     slug: "",
     has_lab: false,
     content: "<p>Enter your lesson content here...</p>",
+    content_type: "html",
     order: lessons.value.length + 1,
-    is_new: true, // Flag to identify new lessons
+    is_new: true,
   };
 
   lessons.value.push(newLesson);
   const newIndex = lessons.value.length - 1;
   selectCarriculum(newLesson, newIndex);
 
-  // Emit event for parent to handle
   emit("lesson-added", newLesson);
 };
 
@@ -380,15 +383,10 @@ const deleteCarriculum = async () => {
   const lessonToDelete = lessons.value[index];
 
   try {
-    // Check if it's a newly added lesson that hasn't been saved to server
     if (lessonToDelete.is_new) {
-      // Handle local deletion for new lessons
       console.log("Deleting newly added lesson locally:", lessonToDelete);
-
-      // Remove from local array immediately
       lessons.value.splice(index, 1);
 
-      // Reset selection if deleted item was selected
       if (selectedCarriculumIndex.value === index) {
         selectedCarriculum.value = {};
         selectedCarriculumIndex.value = null;
@@ -396,21 +394,16 @@ const deleteCarriculum = async () => {
         selectedCarriculumIndex.value--;
       }
 
-      // Emit event for parent to handle local cleanup
       emit("lesson-deleted", lessonToDelete);
     } else {
-      // Handle API deletion for existing lessons
-      const deleteResponse = await deleteLesson(lessonToDelete.slug);
+      const deleteResponse = await deleteLesson(props.moduleSlug, lessonToDelete.slug);
       if (deleteResponse.error) {
         throw new Error(deleteResponse.error);
       }
 
       emit("lesson-deleted", lessonToDelete);
-
-      // Remove from local array
       lessons.value.splice(index, 1);
 
-      // Reset selection if deleted item was selected
       if (selectedCarriculumIndex.value === index) {
         selectedCarriculum.value = {};
         selectedCarriculumIndex.value = null;
@@ -434,6 +427,11 @@ const saveLessonChanges = async () => {
     return;
   }
 
+  if (!props.moduleSlug) {
+    alert("Module slug is required to save lesson");
+    return;
+  }
+
   lessonLoading.value = true;
 
   try {
@@ -442,43 +440,67 @@ const saveLessonChanges = async () => {
       selectedCarriculum.value.slug = generateSlug(selectedCarriculum.value.name);
     }
 
-    // Update the lesson in the array
-    lessons.value[selectedCarriculumIndex.value] = {
-      ...selectedCarriculum.value,
+    let response;
+    
+    // Prepare payload
+    const lessonPayload = {
+      name: selectedCarriculum.value.name,
+      duration: selectedCarriculum.value.duration || "",
+      has_lab: selectedCarriculum.value.has_lab || false,
+      content: selectedCarriculum.value.content || "",
+      content_type: selectedCarriculum.value.content_type || "html",
+      order: selectedCarriculum.value.order || lessons.value.length,
     };
 
-    // Emit save event for parent to handle API call
+    console.log("Saving lesson with payload:", lessonPayload);
+    console.log("Is new lesson:", selectedCarriculum.value.is_new);
+    console.log("Module slug:", props.moduleSlug);
+    
     if (selectedCarriculum.value.is_new) {
-      await createLesson({
-        slug: selectedCarriculum.value.slug,
-        module: props.moduleId,
-        name: selectedCarriculum.value.name,
-        duration: selectedCarriculum.value.duration,
-        has_lab: selectedCarriculum.value.has_lab,
-        content: selectedCarriculum.value.content,
-        content_type: selectedCarriculum.value.content_type || "html",
-        order: selectedCarriculum.value.order,
-      });
+      console.log("Creating new lesson...");
+      lessonPayload.slug = selectedCarriculum.value.slug;
+      lessonPayload.module = props.moduleId;
+      
+      response = await createLesson(lessonPayload, props.moduleSlug);
+      
+      console.log("Create response:", response);
+      
+      if (response?.error) {
+        throw new Error(response.error);
+      }
     } else {
-      await updateLesson(selectedCarriculum.value.slug, {
-        name: selectedCarriculum.value.name,
-        duration: selectedCarriculum.value.duration,
-        has_lab: selectedCarriculum.value.has_lab,
-        content: selectedCarriculum.value.content,
-        order: selectedCarriculum.value.order,
-        module: props.moduleId,
-        content_type: selectedCarriculum.value.content_type || "html",
-        slug: props.value.slug,
-      });
+      console.log("Updating existing lesson with slug:", selectedCarriculum.value.slug);
+      
+      response = await updateLesson(
+        props.moduleSlug, 
+        selectedCarriculum.value.slug, 
+        lessonPayload
+      );
+      
+      console.log("Update response:", response);
+      
+      if (response?.error) {
+        throw new Error(response.error);
+      }
     }
 
-    // Emit save event for parent to handle API call
-    emit("lesson-saved", selectedCarriculum.value);
+    // Refetch lessons to get updated data from server
+    await fetchLessons();
+    
+    // Reset selection after save
+    selectedCarriculum.value = {};
+    selectedCarriculumIndex.value = null;
 
-    console.log("Lesson saved:", selectedCarriculum.value);
+    // Emit save event for parent
+    emit("lesson-saved", response);
+
+    console.log("Lesson saved successfully:", response);
+    alert("Lesson saved successfully!");
   } catch (error) {
-    console.error("Error saving lesson:", error);
-    alert("Failed to save lesson. Please try again.");
+    console.error("Error saving lesson - Full error:", error);
+    console.error("Error stack:", error.stack);
+    const errorMessage = error.message || error.toString();
+    alert(`Failed to save lesson: ${errorMessage}`);
   } finally {
     lessonLoading.value = false;
   }
@@ -486,13 +508,11 @@ const saveLessonChanges = async () => {
 
 const cancelLessonEdit = () => {
   if (selectedCarriculumIndex.value !== null) {
-    // If it's a new lesson that hasn't been saved, remove it
     if (lessons.value[selectedCarriculumIndex.value]?.is_new) {
       lessons.value.splice(selectedCarriculumIndex.value, 1);
       selectedCarriculum.value = {};
       selectedCarriculumIndex.value = null;
     } else {
-      // Restore original values for existing lessons
       const originalLesson = lessons.value[selectedCarriculumIndex.value];
       selectedCarriculum.value = { ...originalLesson };
     }
@@ -523,33 +543,19 @@ const onDragEnd = async (event) => {
 
   if (oldIndex === newIndex) return;
 
-  // Update the order property for all lessons
   lessons.value.forEach((lesson, index) => {
     lesson.order = index + 1;
   });
 
-  // Emit the reordered lessons to parent
   emit("lessons-reordered", lessons.value);
-
-  // If you have an API endpoint to update lesson order, call it here
   await updateLessonOrder();
 };
 
 const updateLessonOrder = async () => {
   try {
-    // Create an array of lesson IDs in their new order
-    const orderedLessons = lessons.value.map((lesson, index) => ({
-      id: lesson.id,
-      order: index + 1,
-    }));
-
-    // If you have an API endpoint for bulk order update, use it here
-    // For now, we'll update each lesson individually
     for (const lesson of lessons.value) {
       if (!lesson.is_new && lesson.id) {
-        // Only update existing lessons (not new ones)
-        const { error } = await updateLesson(lesson.slug, {
-          ...lesson,
+        const { error } = await updateLesson(props.moduleSlug, lesson.slug, {
           order: lesson.order,
         });
 

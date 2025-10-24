@@ -204,7 +204,7 @@
               </li>
             </ul>
             <div
-              class="prose prose-invert"
+              class="prose prose-invert pt-4"
               v-if="previewMarkdown"
               v-html="marked(selectedCarriculum.content)"
             ></div>
